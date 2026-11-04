@@ -1,0 +1,864 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Base CRM Clínicas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: barra lateral fixa + área de trabalho; no celular a barra vira menu inferior.
+   A cor principal vem do CONFIG (variável --brand), o resto são neutros levemente frios. */
+:root{
+  --brand:#1f6b75;
+  --bg:#f2f5f6; --surface:#ffffff; --surface-2:#eaf0f1; --line:#d9e1e3;
+  --fg:#15232a; --muted:#5a6b72;
+  --accent:var(--brand); --on-accent:#ffffff;
+  --ok:#2e8655; --warn:#a96f12; --bad:#bf4038; --info:#3567a6;
+  --side:#0f2a2f; --side-fg:#dfeaec; --side-muted:#8fa7ac;
+  --font-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body:"Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1618; --surface:#152024; --surface-2:#1b292e; --line:#26373c;
+  --fg:#e4edef; --muted:#90a3a9;
+  --accent:color-mix(in srgb, var(--brand) 60%, #ffffff); --on-accent:#0e1618;
+  --ok:#4fb37c; --warn:#d9a046; --bad:#e3675e; --info:#6f9fe0;
+  --side:#0a1214; --side-fg:#dfeaec; --side-muted:#7f9499;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0e1618; --surface:#152024; --surface-2:#1b292e; --line:#26373c;
+  --fg:#e4edef; --muted:#90a3a9;
+  --accent:color-mix(in srgb, var(--brand) 60%, #ffffff); --on-accent:#0e1618;
+  --ok:#4fb37c; --warn:#d9a046; --bad:#e3675e; --info:#6f9fe0;
+  --side:#0a1214; --side-fg:#dfeaec; --side-muted:#7f9499;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:14px;line-height:1.45}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100%}
+.side{background:var(--side);color:var(--side-fg);padding:22px 14px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh}
+.brand{padding:0 8px;display:flex;flex-direction:column;gap:2px}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:var(--brand);display:grid;place-items:center;font-family:var(--font-display);font-weight:700;color:#fff;font-size:17px;margin-bottom:8px}
+.brand h1{font-family:var(--font-display);font-size:19px;font-weight:700;margin:0;line-height:1.15;text-wrap:balance}
+.brand p{margin:0;color:var(--side-muted);font-size:12.5px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;color:var(--side-muted);font-weight:500}
+.nav button:hover{color:var(--side-fg);background:rgba(255,255,255,.05)}
+.nav button[aria-current="true"]{color:#fff;background:rgba(255,255,255,.09)}
+.nav button[aria-current="true"] svg{color:var(--brand);filter:brightness(1.5)}
+.nav .badge{margin-left:auto;background:var(--bad);color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:1px 7px;font-variant-numeric:tabular-nums}
+.nav svg{width:18px;height:18px;flex:none}
+.side-foot{margin-top:auto;padding:12px 10px 0;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:var(--side-muted)}
+
+.main{min-width:0;padding-block:22px 40px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.main-inner{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.top h2{font-family:var(--font-display);font-size:26px;font-weight:700;margin:0;letter-spacing:-.01em}
+.top .sub{color:var(--muted);margin:2px 0 0}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{text-decoration:none;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 13px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.sm{padding:5px 9px;font-size:12.5px;border-radius:7px}
+.btn.wa{color:var(--ok);border-color:color-mix(in srgb, var(--ok) 40%, var(--line))}
+.btn.ghost{background:transparent}
+.btn svg{width:15px;height:15px}
+.mobile-only{display:none}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;min-width:0}
+.panel h3{margin:0 0 12px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.panel h3 .link{all:unset;cursor:pointer;color:var(--accent);text-transform:none;letter-spacing:0;font-weight:600;font-size:12.5px}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.kpi .lbl{font-size:12.5px;color:var(--muted);font-weight:500}
+.kpi .val{font-family:var(--font-display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.kpi .det{font-size:12.5px;color:var(--muted)}
+.kpi.alert .val{color:var(--bad)}
+
+.grid-2{display:grid;grid-template-columns:1.35fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;background:var(--surface-2);color:var(--muted)}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.ok{color:var(--ok);background:color-mix(in srgb, var(--ok) 13%, var(--surface))}
+.pill.warn{color:var(--warn);background:color-mix(in srgb, var(--warn) 14%, var(--surface))}
+.pill.bad{color:var(--bad);background:color-mix(in srgb, var(--bad) 12%, var(--surface))}
+.pill.info{color:var(--info);background:color-mix(in srgb, var(--info) 12%, var(--surface))}
+.pill.plain::before{display:none}
+
+.list{display:flex;flex-direction:column}
+.row{display:grid;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .name{font-weight:600}
+.row .meta{font-size:12.5px;color:var(--muted)}
+.row.click{cursor:pointer;border-radius:6px}
+.row.click:hover{background:var(--surface-2)}
+.time{font-variant-numeric:tabular-nums;font-weight:700;font-size:13px}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.empty{color:var(--muted);padding:18px 4px;text-align:center}
+
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar-row{display:grid;grid-template-columns:132px 1fr 40px;align-items:center;gap:10px;font-size:13px}
+.bar-track{height:10px;border-radius:5px;background:var(--surface-2);overflow:hidden}
+.bar-fill{height:100%;border-radius:5px;background:var(--accent)}
+.bar-row .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+
+.cols{display:flex;align-items:flex-end;gap:10px;height:150px;padding-top:18px}
+.col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;min-width:0}
+.col .c-bar{width:100%;max-width:46px;border-radius:5px 5px 2px 2px;background:color-mix(in srgb, var(--accent) 35%, var(--surface-2));position:relative}
+.col:last-child .c-bar{background:var(--accent)}
+.col .c-val{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.col:last-child .c-val{color:var(--fg);font-weight:700}
+.col .c-lbl{font-size:12px;color:var(--muted);text-transform:capitalize}
+
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 11px;min-width:0}
+.input:focus{border-color:var(--accent);outline:none}
+.search{flex:1;min-width:180px;max-width:360px}
+.tabs{display:inline-flex;background:var(--surface-2);border-radius:9px;padding:3px;gap:2px;flex-wrap:wrap}
+.tabs button{all:unset;cursor:pointer;padding:6px 12px;border-radius:7px;font-weight:600;font-size:13px;color:var(--muted)}
+.tabs button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+/* Pacientes */
+.pac-row{grid-template-columns:minmax(0,1.6fr) minmax(0,1.2fr) minmax(0,1.3fr) 130px 110px}
+.pac-head{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding-bottom:6px}
+
+/* Kanban */
+.board-wrap{overflow-x:auto;padding-bottom:6px}
+.board{display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:10px;min-width:1120px}
+.lane{background:var(--surface-2);border-radius:var(--radius);padding:10px;display:flex;flex-direction:column;gap:8px;min-height:340px}
+.lane.over{outline:2px dashed var(--accent);outline-offset:-2px}
+.lane-head{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:2px 2px 4px}
+.lane-head b{font-size:13px}
+.lane-head .sum{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.lane-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 11px;cursor:grab;display:flex;flex-direction:column;gap:6px}
+.card:hover{border-color:color-mix(in srgb, var(--accent) 55%, var(--line))}
+.card.dragging{opacity:.45}
+.card .c-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.card .c-name{font-weight:600}
+.card .c-val{font-weight:700;font-variant-numeric:tabular-nums;font-size:13px;white-space:nowrap}
+.card .c-svc{font-size:12.5px;color:var(--muted)}
+.card .c-foot{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+
+/* Agenda */
+.days{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.day{all:unset;cursor:pointer;flex:none;min-width:64px;text-align:center;padding:8px 6px;border-radius:9px;border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;gap:1px}
+.day .dw{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.day .dn{font-family:var(--font-display);font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.day .dc{font-size:11px;color:var(--muted)}
+.day[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.day[aria-pressed="true"] .dw,.day[aria-pressed="true"] .dc{color:inherit;opacity:.85}
+.day.today .dw::after{content:" • hoje"}
+.pros{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.pro-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12.5px;color:var(--accent);background:color-mix(in srgb, var(--accent) 14%, var(--surface));flex:none}
+.pro-head .n{font-weight:700;line-height:1.2}
+.pro-head .a{font-size:12px;color:var(--muted)}
+.appt{display:grid;grid-template-columns:48px 1fr;gap:10px;padding:9px 8px;border-radius:8px;cursor:pointer;border-left:3px solid var(--line)}
+.appt:hover{background:var(--surface-2)}
+.appt.s-confirmado{border-left-color:var(--ok)}
+.appt.s-pendente{border-left-color:var(--warn)}
+.appt.s-atendido{border-left-color:var(--muted);opacity:.75}
+.appt.s-faltou{border-left-color:var(--bad)}
+.appt .who{font-weight:600}
+.appt .what{font-size:12.5px;color:var(--muted)}
+
+/* Retornos / orçamentos */
+.ret-row{grid-template-columns:minmax(0,1.4fr) minmax(0,1.3fr) 120px auto}
+.orc-row{grid-template-columns:minmax(0,1.3fr) minmax(0,1.3fr) 100px 120px auto}
+.acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.done{opacity:.55}
+.group-title{display:flex;align-items:center;gap:8px;font-weight:700;margin:4px 0 6px}
+.group-title .count{color:var(--muted);font-weight:500;font-size:13px}
+
+/* Config */
+.form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field.full{grid-column:1/-1}
+.field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{width:30px;height:30px;border-radius:8px;border:2px solid transparent;cursor:pointer;padding:0}
+.sw[aria-pressed="true"]{border-color:var(--fg)}
+.team-row{display:grid;grid-template-columns:1.3fr 1.2fr 140px 36px;gap:8px;align-items:center}
+.note{background:var(--surface-2);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--muted)}
+.note b{color:var(--fg)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+
+/* Modal + toast */
+.backdrop{position:fixed;inset:0;background:rgba(8,18,20,.45);display:grid;place-items:center;z-index:50;padding:16px}
+.modal{background:var(--surface);border-radius:12px;border:1px solid var(--line);width:min(560px,100%);max-height:calc(100% - 32px);overflow:auto;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.modal-head h4{margin:0;font-family:var(--font-display);font-size:20px}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.x{all:unset;cursor:pointer;width:30px;height:30px;display:grid;place-items:center;border-radius:7px;color:var(--muted);font-size:20px}
+.x:hover{background:var(--surface-2)}
+.hist{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--line);margin-left:6px}
+.hist div{padding:6px 0 6px 14px;position:relative}
+.hist div::before{content:"";position:absolute;left:-6px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom, 0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:9px;font-weight:600;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+
+.bottom-nav{display:none}
+
+@media (max-width: 1080px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+}
+@media (max-width: 820px){
+  .app{grid-template-columns:1fr}
+  .side{display:none}
+  .mobile-only{display:inline-flex}
+  .main{padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px))}
+  .top h2{font-size:22px}
+  .bottom-nav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--side);
+    padding:6px max(6px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px));justify-content:space-around}
+  .bottom-nav button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:var(--side-muted);padding:4px 4px;flex:1;position:relative}
+  .bottom-nav button[aria-current="true"]{color:#fff}
+  .bottom-nav svg{width:20px;height:20px}
+  .bottom-nav .dot{position:absolute;top:2px;left:calc(50% + 6px);width:8px;height:8px;border-radius:50%;background:var(--bad)}
+  .pac-row{grid-template-columns:1fr auto}
+  .pac-row .hide-m{display:none}
+  .pac-head{display:none}
+  .ret-row,.orc-row{grid-template-columns:1fr auto}
+  .ret-row .acts,.orc-row .acts{grid-column:1/-1;justify-content:flex-start}
+  .orc-row .hide-m,.ret-row .hide-m{display:none}
+  .form{grid-template-columns:1fr}
+  .team-row{grid-template-columns:1fr 1fr;}
+  .team-row .seg-sel{grid-column:1/2}
+}
+@media (max-width: 420px){
+  .kpi .val{font-size:23px}
+  .bar-row{grid-template-columns:86px 1fr 34px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="app">
+  <aside class="side" aria-label="Menu principal">
+    <div class="brand">
+      <div class="brand-mark" id="brandMark">C</div>
+      <h1 id="brandName">Clínica</h1>
+      <p id="brandSub"></p>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">Demonstração com dados fictícios</div>
+  </aside>
+  <main class="main"><div class="main-inner" id="view"></div></main>
+</div>
+<nav class="bottom-nav" id="bottomNav" aria-label="Menu"></nav>
+<div id="modalRoot"></div>
+
+<script>
+/* ===================================================================
+   CONFIG — é só mexer aqui para personalizar para cada clínica.
+   Nome, cor, tipo de clínica, equipe e mensagem de retorno.
+   =================================================================== */
+const CONFIG = {
+  nome: "Clínica Lumen",
+  subtitulo: "Estética & Odontologia",
+  cor: "#1f6b75",
+  segmento: "ambos",            // "estetica", "odonto" ou "ambos"
+  equipe: [
+    { nome: "Dra. Carolina Mendes", area: "Harmonização facial", seg: "estetica" },
+    { nome: "Júlia Prado",          area: "Esteticista",         seg: "estetica" },
+    { nome: "Dra. Beatriz Lima",    area: "Clínica geral",       seg: "odonto" },
+    { nome: "Dr. Rafael Sousa",     area: "Implantes",           seg: "odonto" }
+  ],
+  mensagemRetorno: "Olá, {nome}! Aqui é da {clinica}. Já está chegando a hora do seu retorno de {procedimento}. Quer que eu reserve um horário para você esta semana?",
+  mensagemOrcamento: "Olá, {nome}! Aqui é da {clinica}. Passando para saber se ficou alguma dúvida sobre o orçamento de {procedimento}. Posso ajudar com formas de pagamento ou um horário para começar?"
+};
+
+/* Serviços padrão. "retorno" = em quantos dias o paciente deve voltar (0 = não tem retorno). */
+const SERVICOS = {
+  estetica: [
+    { nome: "Toxina botulínica",        preco: 1500, retorno: 120 },
+    { nome: "Preenchimento labial",     preco: 1800, retorno: 270 },
+    { nome: "Bioestimulador de colágeno", preco: 2400, retorno: 180 },
+    { nome: "Limpeza de pele",          preco: 250,  retorno: 30 },
+    { nome: "Peeling químico",          preco: 450,  retorno: 30 },
+    { nome: "Depilação a laser",        preco: 300,  retorno: 40 }
+  ],
+  odonto: [
+    { nome: "Limpeza e profilaxia",     preco: 220,  retorno: 180 },
+    { nome: "Clareamento dental",       preco: 1200, retorno: 365 },
+    { nome: "Restauração",              preco: 350,  retorno: 0 },
+    { nome: "Tratamento de canal",      preco: 1100, retorno: 0 },
+    { nome: "Implante dentário",        preco: 4500, retorno: 180 },
+    { nome: "Alinhadores invisíveis",   preco: 9000, retorno: 60 }
+  ]
+};
+
+const ETAPAS = [
+  { id: "novo",      nome: "Novo contato",       cor: "var(--info)" },
+  { id: "avaliacao", nome: "Avaliação agendada", cor: "var(--warn)" },
+  { id: "orcamento", nome: "Orçamento enviado",  cor: "var(--accent)" },
+  { id: "fechado",   nome: "Fechado",            cor: "var(--ok)" },
+  { id: "perdido",   nome: "Perdido",            cor: "var(--bad)" }
+];
+const ORIGENS = ["Instagram", "Indicação", "Google", "WhatsApp", "Passou na frente"];
+const MOTIVOS = ["Achou caro", "Sem resposta", "Escolheu outra clínica", "Adiou para depois"];
+
+/* ---------- utilidades ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dia0 = d => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+const HOJE = dia0(new Date());
+const addDias = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const difDias = (a, b) => Math.round((dia0(a) - dia0(b)) / 86400000);
+const fmtData = d => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+const fmtDataAno = d => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+const semana = d => d.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "");
+const fmtDia = d => `${semana(d)}, ${fmtData(d)}`;
+const reais = v => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+const iniciais = n => n.replace(/^(Dra?\.)\s*/, "").split(" ").filter(Boolean).slice(0, 2).map(p => p[0]).join("").toUpperCase();
+const haDias = n => n <= 0 ? "hoje" : n === 1 ? "há 1 dia" : `há ${n} dias`;
+let seed = 7;
+const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const entre = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+const um = arr => arr[Math.floor(rnd() * arr.length)];
+const pesoOrigem = () => { const r = rnd(); return r < .38 ? "Instagram" : r < .62 ? "Indicação" : r < .78 ? "Google" : r < .93 ? "WhatsApp" : "Passou na frente"; };
+
+const servicosAtivos = () => CONFIG.segmento === "ambos" ? [...SERVICOS.estetica, ...SERVICOS.odonto] : SERVICOS[CONFIG.segmento];
+const equipeAtiva = () => CONFIG.segmento === "ambos" ? CONFIG.equipe : CONFIG.equipe.filter(p => p.seg === CONFIG.segmento);
+const servicosDe = prof => prof && SERVICOS[prof.seg] && CONFIG.segmento === "ambos" ? SERVICOS[prof.seg] : servicosAtivos();
+const acharServico = nome => [...SERVICOS.estetica, ...SERVICOS.odonto].find(s => s.nome === nome);
+const msg = (tpl, nome, proc) => tpl.replace("{nome}", nome.split(" ")[0]).replace("{clinica}", CONFIG.nome).replace("{procedimento}", proc.toLowerCase());
+// Sem número de telefone: o WhatsApp abre e você escolhe o contato. Evita mandar mensagem para números de exemplo.
+const linkWa = texto => "https://wa.me/?text=" + encodeURIComponent(texto);
+const telFake = () => `(51) 9 ••••-${String(entre(1000, 9999))}`;
+
+/* ---------- dados de exemplo ---------- */
+const PRIMEIROS = ["Ana Paula","Bruna","Camila","Daniela","Eduarda","Fernanda","Gabriela","Helena","Isabela","Juliana","Larissa","Mariana","Natália","Patrícia","Rafaela","Sabrina","Tatiane","Vanessa","Luana","Carolina","Carlos","Diego","Felipe","Ricardo","André","Rodrigo","Thiago","Bruno","Lucas","Marcos"];
+const SOBRENOMES = ["Ribeiro","Kessler","Fontoura","Machado","Pires","Bittencourt","Schmitt","Dornelles","Vargas","Moraes","Becker","Lopes","Weber","Antunes","Martins","Castro","Rocha","Klein","Prates","Lemos","Coelho","Saraiva","Fagundes","Teixeira"];
+let S = {};
+
+function gerarDados() {
+  seed = 7;
+  const usados = new Set();
+  const novoNome = () => { let n; do { n = um(PRIMEIROS) + " " + um(SOBRENOMES); } while (usados.has(n)); usados.add(n); return n; };
+  const equipe = equipeAtiva();
+  const pacientes = [];
+  for (let i = 0; i < 26; i++) {
+    const hist = [];
+    const qtd = entre(1, 3);
+    for (let k = 0; k < qtd; k++) {
+      const prof = um(equipe);
+      const svc = um(servicosDe(prof));
+      hist.push({ svc: svc.nome, data: addDias(HOJE, -entre(3, 380)), prof: prof.nome });
+    }
+    hist.sort((a, b) => a.data - b.data);
+    // deixa o retorno mais recente perto de hoje (vencido há pouco ou vencendo), como numa clínica real
+    for (let k = hist.length - 1; k >= 0; k--) {
+      const s = acharServico(hist[k].svc);
+      if (s && s.retorno) { hist[k].data = addDias(HOJE, -entre(5, s.retorno + 45)); break; }
+    }
+    hist.sort((a, b) => a.data - b.data);
+    pacientes.push({ id: "p" + i, nome: novoNome(), tel: telFake(), origem: pesoOrigem(), desde: addDias(hist[0].data, -entre(0, 40)), hist, contatado: false });
+  }
+  const leads = [];
+  const dist = [["novo",4],["avaliacao",4],["orcamento",6],["fechado",4],["perdido",3]];
+  let li = 0;
+  for (const [etapa, n] of dist) for (let k = 0; k < n; k++) {
+    const prof = um(equipe);
+    const svc = um(servicosDe(prof).filter(s => s.preco >= 220));
+    const mult = svc.preco < 600 ? um([1, 3, 4]) : um([1, 1, 1.5, 2]);
+    const parado = etapa === "orcamento" ? um([1, 2, 4, 6, 9, 12, 16]) : etapa === "novo" ? entre(0, 2) : entre(1, 25);
+    leads.push({ id: "l" + (li++), nome: novoNome(), tel: telFake(), origem: pesoOrigem(), interesse: svc.nome, valor: Math.round(svc.preco * mult / 50) * 50, etapa, atualizado: addDias(HOJE, -parado), prof: prof.nome, motivo: etapa === "perdido" ? um(MOTIVOS) : "" });
+  }
+  const agenda = [];
+  const horas = ["08:30","09:30","10:30","11:30","14:00","15:00","16:00","17:00"];
+  const agora = new Date();
+  for (let d = -3; d <= 7; d++) {
+    const dia = addDias(HOJE, d);
+    if (dia.getDay() === 0) continue;               // domingo fechado
+    const sabado = dia.getDay() === 6;
+    for (const prof of equipe) {
+      const livres = horas.filter(h => !sabado || h < "12:00");
+      const n = sabado ? entre(1, 2) : entre(2, 4);
+      const escolhidas = [...livres].sort(() => rnd() - .5).slice(0, n).sort();
+      for (const h of escolhidas) {
+        const p = um(pacientes);
+        let status;
+        if (d < 0) status = rnd() < .87 ? "atendido" : "faltou";
+        else if (d === 0) { const [hh, mm] = h.split(":").map(Number); status = (hh * 60 + mm) < agora.getHours() * 60 + agora.getMinutes() ? "atendido" : (rnd() < .7 ? "confirmado" : "pendente"); }
+        else status = rnd() < .62 ? "confirmado" : "pendente";
+        agenda.push({ id: "a" + agenda.length, data: dia, hora: h, paciente: p.nome, servico: um(servicosDe(prof)).nome, prof: prof.nome, status });
+      }
+    }
+  }
+  const base = CONFIG.segmento === "estetica" ? 38000 : CONFIG.segmento === "odonto" ? 46000 : 71000;
+  const historico = [];
+  for (let m = 6; m >= 1; m--) {
+    const d = new Date(HOJE.getFullYear(), HOJE.getMonth() - m, 1);
+    historico.push({ mes: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""), valor: Math.round(base * (0.78 + rnd() * 0.32 + (5 - m) * 0.025) / 100) * 100 });
+  }
+  S = { pacientes, leads, agenda, historico, tela: S.tela || "geral", diaAgenda: null, filtroOrc: "aberto", busca: "" };
+}
+
+/* ---------- regras derivadas ---------- */
+function retornoDe(p) {
+  for (let i = p.hist.length - 1; i >= 0; i--) {
+    const svc = acharServico(p.hist[i].svc);
+    if (svc && svc.retorno) {
+      const vence = addDias(p.hist[i].data, svc.retorno);
+      return { svc: svc.nome, preco: svc.preco, feito: p.hist[i].data, vence, dias: difDias(vence, HOJE) };
+    }
+  }
+  return null;
+}
+function retornos() {
+  return S.pacientes.map(p => ({ p, r: retornoDe(p) })).filter(x => x.r && x.r.dias <= 30).sort((a, b) => a.r.dias - b.r.dias);
+}
+const atrasadosPendentes = () => retornos().filter(x => x.r.dias < 0 && !x.p.contatado);
+function temperatura(l) {
+  const d = difDias(HOJE, l.atualizado);
+  if (d <= 2) return { cls: "ok", txt: "Recente" };
+  if (d <= 7) return { cls: "warn", txt: "Esfriando" };
+  return { cls: "bad", txt: "Parado" };
+}
+function diaFoco() {
+  for (let d = 0; d < 7; d++) { const dia = addDias(HOJE, d); if (S.agenda.some(a => difDias(a.data, dia) === 0)) return dia; }
+  return HOJE;
+}
+const agendaDo = dia => S.agenda.filter(a => difDias(a.data, dia) === 0).sort((a, b) => a.hora.localeCompare(b.hora));
+const STATUS = { confirmado: "ok", pendente: "warn", atendido: "plain", faltou: "bad" };
+const STATUS_TXT = { confirmado: "Confirmado", pendente: "Aguardando confirmação", atendido: "Atendido", faltou: "Faltou" };
+
+/* ---------- ícones ---------- */
+const I = {
+  geral: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+  pacientes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.4 3.6 5.2"/></svg>',
+  funil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z"/></svg>',
+  agenda: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  retornos: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7.5V12l3 2"/></svg>',
+  orcamentos: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5h9l4 4V21H6z"/><path d="M14.5 2.5V7H19M9.5 12h6M9.5 16h6"/></svg>',
+  config: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  wa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.6a8.5 8.5 0 0 1-12.6 7.5L3.5 20.5l1.4-4.2A8.5 8.5 0 1 1 20.5 11.6z"/></svg>',
+  mais: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+};
+const TELAS = [
+  { id: "geral",      nome: "Visão geral", curto: "Início" },
+  { id: "pacientes",  nome: "Pacientes",   curto: "Pacientes" },
+  { id: "funil",      nome: "Funil",       curto: "Funil" },
+  { id: "agenda",     nome: "Agenda",      curto: "Agenda" },
+  { id: "retornos",   nome: "Retornos",    curto: "Retornos" },
+  { id: "orcamentos", nome: "Orçamentos",  curto: "Orçam." },
+  { id: "config",     nome: "Personalizar", curto: "Ajustes" }
+];
+
+/* ---------- casca ---------- */
+function aplicarMarca() {
+  document.documentElement.style.setProperty("--brand", CONFIG.cor);
+  $("#brandName").textContent = CONFIG.nome;
+  $("#brandSub").textContent = CONFIG.subtitulo;
+  $("#brandMark").textContent = iniciais(CONFIG.nome.replace(/^Cl[íi]nica\s+/i, "")).slice(0, 1) || "C";
+}
+function menu() {
+  const atrasos = atrasadosPendentes().length;
+  $("#nav").innerHTML = TELAS.map(t => `<button data-tela="${t.id}" aria-current="${S.tela === t.id}">${I[t.id]}<span>${t.nome}</span>${t.id === "retornos" && atrasos ? `<span class="badge">${atrasos}</span>` : ""}</button>`).join("");
+  $("#bottomNav").innerHTML = TELAS.filter(t => t.id !== "config").map(t => `<button data-tela="${t.id}" aria-current="${S.tela === t.id}">${I[t.id]}<span>${t.curto}</span>${t.id === "retornos" && atrasos ? '<i class="dot"></i>' : ""}</button>`).join("");
+}
+function ir(tela) { S.tela = tela; render(); window.scrollTo(0, 0); }
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-tela]");
+  if (b) ir(b.dataset.tela);
+});
+function topo(titulo, sub, acoes = "") {
+  return `<div class="top"><div><h2>${titulo}</h2><p class="sub">${sub}</p></div><div class="top-actions">${acoes}<button class="btn ghost mobile-only" data-tela="config" aria-label="Personalizar">${I.config}</button></div></div>`;
+}
+function toast(t) {
+  const el = document.createElement("div"); el.className = "toast"; el.textContent = t; document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2300);
+}
+function modal(titulo, corpo, botoes, aoAbrir) {
+  $("#modalRoot").innerHTML = `<div class="backdrop" id="bd"><div class="modal" role="dialog" aria-modal="true" aria-label="${esc(titulo)}"><div class="modal-head"><h4>${esc(titulo)}</h4><button class="x" id="mx" aria-label="Fechar">×</button></div><div>${corpo}</div>${botoes ? `<div class="modal-foot">${botoes}</div>` : ""}</div></div>`;
+  $("#mx").onclick = fechar;
+  $("#bd").onclick = e => { if (e.target.id === "bd") fechar(); };
+  if (aoAbrir) aoAbrir();
+  const f = $("#modalRoot input, #modalRoot select"); if (f) f.focus();
+}
+function fechar() { $("#modalRoot").innerHTML = ""; }
+document.addEventListener("keydown", e => { if (e.key === "Escape") fechar(); });
+const btnWa = (texto, rotulo = "WhatsApp") => `<a class="btn sm wa" href="${linkWa(texto)}" target="_blank" rel="noopener">${I.wa}${rotulo}</a>`;
+const optList = (arr, sel) => arr.map(v => `<option ${v === sel ? "selected" : ""}>${esc(v)}</option>`).join("");
+
+/* ---------- Visão geral ---------- */
+function telaGeral() {
+  const foco = diaFoco();
+  const ehHoje = difDias(foco, HOJE) === 0;
+  const doDia = agendaDo(foco);
+  const conf = doDia.filter(a => a.status === "confirmado").length, pend = doDia.filter(a => a.status === "pendente").length;
+  const abertos = S.leads.filter(l => l.etapa === "orcamento");
+  const parados = abertos.filter(l => difDias(HOJE, l.atualizado) > 7);
+  const fechados30 = S.leads.filter(l => l.etapa === "fechado" && difDias(HOJE, l.atualizado) <= 30);
+  const atrasos = atrasadosPendentes();
+  const potencial = atrasos.reduce((s, x) => s + x.r.preco, 0);
+
+  const contagem = ETAPAS.map(e => ({ ...e, n: S.leads.filter(l => l.etapa === e.id).length }));
+  const maxE = Math.max(...contagem.map(c => c.n), 1);
+  const origens = ORIGENS.map(o => ({ o, n: S.pacientes.filter(p => p.origem === o).length })).sort((a, b) => b.n - a.n);
+  const maxO = Math.max(...origens.map(o => o.n), 1);
+  const maxH = Math.max(...S.historico.map(h => h.valor));
+
+  const acoes = [
+    ...parados.sort((a, b) => a.atualizado - b.atualizado).slice(0, 3).map(l => ({ nome: l.nome, txt: `Orçamento de ${l.interesse.toLowerCase()} parado ${haDias(difDias(HOJE, l.atualizado))}`, valor: l.valor, m: msg(CONFIG.mensagemOrcamento, l.nome, l.interesse), tipo: "Orçamento" })),
+    ...atrasos.slice(0, 3).map(x => ({ nome: x.p.nome, txt: `Retorno de ${x.r.svc.toLowerCase()} venceu ${haDias(-x.r.dias)}`, valor: x.r.preco, m: msg(CONFIG.mensagemRetorno, x.p.nome, x.r.svc), tipo: "Retorno" }))
+  ];
+
+  return topo("Visão geral", `${fmtDia(HOJE)} · ${esc(CONFIG.nome)}`) + `
+  <section class="kpis">
+    <div class="kpi"><span class="lbl">Agendamentos ${ehHoje ? "hoje" : "de " + fmtDia(foco)}</span><span class="val">${doDia.length}</span><span class="det">${conf} confirmados · ${pend} aguardando</span></div>
+    <div class="kpi"><span class="lbl">Orçamentos em aberto</span><span class="val">${reais(abertos.reduce((s, l) => s + l.valor, 0))}</span><span class="det">${abertos.length} orçamentos · ${parados.length} parados há +7 dias</span></div>
+    <div class="kpi"><span class="lbl">Fechado nos últimos 30 dias</span><span class="val">${reais(fechados30.reduce((s, l) => s + l.valor, 0))}</span><span class="det">${fechados30.length} tratamentos vendidos</span></div>
+    <div class="kpi ${atrasos.length ? "alert" : ""}"><span class="lbl">Retornos vencidos sem contato</span><span class="val">${atrasos.length}</span><span class="det">${reais(potencial)} em potencial de volta</span></div>
+  </section>
+
+  <section class="grid-2">
+    <div class="panel">
+      <h3>Ações sugeridas para hoje <span class="pill plain">${acoes.length} pendentes</span></h3>
+      <div class="list">${acoes.length ? acoes.map(a => `
+        <div class="row" style="grid-template-columns:minmax(0,1fr) auto">
+          <div style="min-width:0"><div class="name">${esc(a.nome)} <span class="pill ${a.tipo === "Retorno" ? "info" : "warn"}">${a.tipo}</span></div><div class="meta">${esc(a.txt)} · ${reais(a.valor)}</div></div>
+          ${btnWa(a.m, "Chamar")}
+        </div>`).join("") : '<div class="empty">Nada pendente. Tudo em dia.</div>'}
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Agenda ${ehHoje ? "de hoje" : "de " + fmtDia(foco)} <button class="link" data-tela="agenda">Ver agenda</button></h3>
+      <div class="list">${doDia.slice(0, 7).map(a => `
+        <div class="row" style="grid-template-columns:46px minmax(0,1fr) auto">
+          <span class="time">${a.hora}</span>
+          <div style="min-width:0"><div class="name">${esc(a.paciente)}</div><div class="meta">${esc(a.servico)} · ${esc(a.prof)}</div></div>
+          <span class="pill ${STATUS[a.status]}">${a.status === "pendente" ? "Pendente" : STATUS_TXT[a.status]}</span>
+        </div>`).join("") || '<div class="empty">Sem atendimentos.</div>'}
+        ${doDia.length > 7 ? `<div class="meta" style="padding-top:8px">+ ${doDia.length - 7} atendimentos</div>` : ""}
+      </div>
+    </div>
+  </section>
+
+  <section class="grid-3">
+    <div class="panel"><h3>Funil de pacientes <button class="link" data-tela="funil">Abrir</button></h3>
+      <div class="bars">${contagem.map(c => `<div class="bar-row"><span>${c.nome}</span><div class="bar-track"><div class="bar-fill" style="width:${c.n / maxE * 100}%;background:${c.cor}"></div></div><span class="n">${c.n}</span></div>`).join("")}</div>
+    </div>
+    <div class="panel"><h3>De onde vêm os pacientes</h3>
+      <div class="bars">${origens.map(o => `<div class="bar-row"><span>${o.o}</span><div class="bar-track"><div class="bar-fill" style="width:${o.n / maxO * 100}%"></div></div><span class="n">${Math.round(o.n / S.pacientes.length * 100)}%</span></div>`).join("")}</div>
+    </div>
+    <div class="panel"><h3>Faturamento por mês</h3>
+      <div class="cols">${S.historico.map(h => `<div class="col"><span class="c-val">${(h.valor / 1000).toFixed(0)} mil</span><div class="c-bar" style="height:${h.valor / maxH * 100}%"></div><span class="c-lbl">${h.mes}</span></div>`).join("")}</div>
+    </div>
+  </section>`;
+}
+
+/* ---------- Pacientes ---------- */
+function telaPacientes() {
+  const q = S.busca.trim().toLowerCase();
+  const lista = S.pacientes.filter(p => !q || p.nome.toLowerCase().includes(q) || p.hist.some(h => h.svc.toLowerCase().includes(q)))
+    .sort((a, b) => a.nome.localeCompare(b.nome));
+  return topo("Pacientes", `${S.pacientes.length} pacientes cadastrados`, `<button class="btn primary" id="novoPac">${I.mais}Novo paciente</button>`) + `
+  <div class="toolbar"><input class="input search" id="busca" type="search" placeholder="Buscar por nome ou procedimento" value="${esc(S.busca)}"></div>
+  <div class="panel">
+    <div class="row pac-row pac-head"><span>Paciente</span><span class="hide-m">Último procedimento</span><span class="hide-m">Próximo retorno</span><span class="hide-m">Origem</span><span>Telefone</span></div>
+    <div class="list">${lista.map(p => {
+      const ult = p.hist[p.hist.length - 1], r = retornoDe(p);
+      const rTxt = !r ? '<span class="muted">Sem retorno</span>' : r.dias < 0 ? `<span class="pill bad">Venceu ${fmtData(r.vence)}</span>` : r.dias <= 30 ? `<span class="pill warn">${fmtData(r.vence)}</span>` : `<span class="muted num">${fmtDataAno(r.vence)}</span>`;
+      return `<div class="row pac-row click" data-pac="${p.id}">
+        <div style="min-width:0"><div class="name">${esc(p.nome)}</div><div class="meta">Paciente desde ${fmtDataAno(p.desde)}</div></div>
+        <div class="hide-m" style="min-width:0"><div>${esc(ult.svc)}</div><div class="meta num">${fmtDataAno(ult.data)}</div></div>
+        <div class="hide-m">${rTxt}</div>
+        <div class="hide-m meta">${p.origem}</div>
+        <div class="meta num">${p.tel}</div></div>`;
+    }).join("") || '<div class="empty">Nenhum paciente encontrado.</div>'}</div>
+  </div>`;
+}
+function fichaPaciente(id) {
+  const p = S.pacientes.find(x => x.id === id), r = retornoDe(p);
+  modal(p.nome, `
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="toolbar"><span class="pill plain num">${p.tel}</span><span class="pill plain">Veio por ${p.origem}</span><span class="pill plain">Desde ${fmtDataAno(p.desde)}</span></div>
+      ${r ? `<div class="note"><b>Próximo retorno:</b> ${esc(r.svc)} em ${fmtDataAno(r.vence)} ${r.dias < 0 ? `<span class="pill bad">vencido ${haDias(-r.dias)}</span>` : ""}</div>` : ""}
+      <div><div class="group-title">Histórico</div><div class="hist">${[...p.hist].reverse().map(h => `<div><b>${esc(h.svc)}</b><div class="meta num">${fmtDataAno(h.data)} · ${esc(h.prof)}</div></div>`).join("")}</div></div>
+    </div>`,
+    `${r ? btnWa(msg(CONFIG.mensagemRetorno, p.nome, r.svc), "Lembrar retorno") : ""}<button class="btn" id="agendarP">Agendar</button>`,
+    () => { $("#agendarP").onclick = () => novoAgendamento(p.nome); });
+}
+function novoPaciente() {
+  const svcs = servicosAtivos().map(s => s.nome);
+  modal("Novo paciente", `<div class="form">
+    <div class="field full"><label for="np-nome">Nome completo</label><input class="input" id="np-nome"></div>
+    <div class="field"><label for="np-tel">Telefone</label><input class="input" id="np-tel" placeholder="(51) 9 0000-0000"></div>
+    <div class="field"><label for="np-or">Como conheceu</label><select class="input" id="np-or">${optList(ORIGENS)}</select></div>
+    <div class="field"><label for="np-svc">Procedimento feito</label><select class="input" id="np-svc">${optList(svcs)}</select></div>
+    <div class="field"><label for="np-data">Data</label><input class="input" id="np-data" type="date" value="${HOJE.toISOString().slice(0, 10)}"></div>
+  </div>`, `<button class="btn" id="cancel">Cancelar</button><button class="btn primary" id="salvar">Salvar paciente</button>`, () => {
+    $("#cancel").onclick = fechar;
+    $("#salvar").onclick = () => {
+      const nome = $("#np-nome").value.trim(); if (!nome) { $("#np-nome").focus(); toast("Preencha o nome do paciente"); return; }
+      const data = $("#np-data").value ? dia0(new Date($("#np-data").value + "T12:00")) : HOJE;
+      S.pacientes.push({ id: "p" + Date.now(), nome, tel: $("#np-tel").value || "—", origem: $("#np-or").value, desde: data, hist: [{ svc: $("#np-svc").value, data, prof: equipeAtiva()[0]?.nome || "" }], contatado: false });
+      fechar(); render(); toast("Paciente cadastrado");
+    };
+  });
+}
+
+/* ---------- Funil ---------- */
+function telaFunil() {
+  return topo("Funil", "Arraste os cartões entre as etapas ou clique para abrir", `<button class="btn primary" id="novoLead">${I.mais}Novo contato</button>`) + `
+  <div class="board-wrap"><div class="board">${ETAPAS.map(e => {
+    const ls = S.leads.filter(l => l.etapa === e.id).sort((a, b) => b.atualizado - a.atualizado);
+    return `<div class="lane" data-etapa="${e.id}">
+      <div class="lane-head"><b><span class="lane-dot" style="background:${e.cor}"></span>${e.nome} <span class="muted">${ls.length}</span></b><span class="sum">${reais(ls.reduce((s, l) => s + l.valor, 0))}</span></div>
+      ${ls.map(l => {
+        const t = temperatura(l);
+        return `<div class="card" draggable="true" data-lead="${l.id}">
+          <div class="c-top"><span class="c-name">${esc(l.nome)}</span><span class="c-val">${reais(l.valor)}</span></div>
+          <span class="c-svc">${esc(l.interesse)}</span>
+          <div class="c-foot"><span>${l.origem}</span>${e.id === "orcamento" ? `<span class="pill ${t.cls}">${t.txt}</span>` : e.id === "perdido" ? `<span>${esc(l.motivo)}</span>` : `<span>${haDias(difDias(HOJE, l.atualizado))}</span>`}</div>
+        </div>`;
+      }).join("")}
+    </div>`;
+  }).join("")}</div></div>`;
+}
+function ligarFunil() {
+  let arrastando = null;
+  document.querySelectorAll(".card[data-lead]").forEach(c => {
+    c.addEventListener("dragstart", () => { arrastando = c.dataset.lead; c.classList.add("dragging"); });
+    c.addEventListener("dragend", () => c.classList.remove("dragging"));
+    c.addEventListener("click", () => abrirLead(c.dataset.lead));
+  });
+  document.querySelectorAll(".lane").forEach(l => {
+    l.addEventListener("dragover", e => { e.preventDefault(); l.classList.add("over"); });
+    l.addEventListener("dragleave", () => l.classList.remove("over"));
+    l.addEventListener("drop", e => {
+      e.preventDefault(); l.classList.remove("over");
+      const lead = S.leads.find(x => x.id === arrastando); if (!lead || lead.etapa === l.dataset.etapa) return;
+      if (l.dataset.etapa === "perdido") { abrirLead(lead.id, "perdido"); return; }
+      lead.etapa = l.dataset.etapa; lead.atualizado = HOJE; lead.motivo = ""; render();
+      toast(`${lead.nome.split(" ")[0]} movido para ${ETAPAS.find(e => e.id === lead.etapa).nome}`);
+    });
+  });
+}
+function abrirLead(id, etapaInicial) {
+  const l = S.leads.find(x => x.id === id);
+  const et = etapaInicial || l.etapa;
+  modal(l.nome, `<div class="form">
+    <div class="field"><label for="ld-et">Etapa</label><select class="input" id="ld-et">${ETAPAS.map(e => `<option value="${e.id}" ${e.id === et ? "selected" : ""}>${e.nome}</option>`).join("")}</select></div>
+    <div class="field"><label for="ld-val">Valor do orçamento (R$)</label><input class="input num" id="ld-val" type="number" min="0" step="50" value="${l.valor}"></div>
+    <div class="field" id="ld-mot-f" ${et === "perdido" ? "" : "hidden"}><label for="ld-mot">Motivo da perda</label><select class="input" id="ld-mot">${optList(MOTIVOS, l.motivo)}</select></div>
+    <div class="field full note"><b>${esc(l.interesse)}</b> · veio por ${l.origem} · ${esc(l.prof)} · atualizado ${haDias(difDias(HOJE, l.atualizado))} · <span class="num">${l.tel}</span></div>
+  </div>`, `${btnWa(msg(CONFIG.mensagemOrcamento, l.nome, l.interesse), "Chamar no WhatsApp")}<button class="btn primary" id="ld-ok">Salvar</button>`, () => {
+    $("#ld-et").onchange = () => { $("#ld-mot-f").hidden = $("#ld-et").value !== "perdido"; };
+    $("#ld-ok").onclick = () => {
+      const nova = $("#ld-et").value;
+      if (nova !== l.etapa) l.atualizado = HOJE;
+      l.etapa = nova; l.valor = Number($("#ld-val").value) || 0; l.motivo = nova === "perdido" ? $("#ld-mot").value : "";
+      fechar(); render(); toast("Contato atualizado");
+    };
+  });
+}
+function novoLead() {
+  modal("Novo contato", `<div class="form">
+    <div class="field full"><label for="nl-nome">Nome</label><input class="input" id="nl-nome"></div>
+    <div class="field"><label for="nl-tel">Telefone</label><input class="input" id="nl-tel" placeholder="(51) 9 0000-0000"></div>
+    <div class="field"><label for="nl-or">Origem</label><select class="input" id="nl-or">${optList(ORIGENS)}</select></div>
+    <div class="field"><label for="nl-svc">Interesse</label><select class="input" id="nl-svc">${optList(servicosAtivos().map(s => s.nome))}</select></div>
+    <div class="field"><label for="nl-pro">Profissional</label><select class="input" id="nl-pro">${optList(equipeAtiva().map(p => p.nome))}</select></div>
+  </div>`, `<button class="btn" id="cancel">Cancelar</button><button class="btn primary" id="nl-ok">Adicionar ao funil</button>`, () => {
+    $("#cancel").onclick = fechar;
+    $("#nl-ok").onclick = () => {
+      const nome = $("#nl-nome").value.trim(); if (!nome) { toast("Preencha o nome"); $("#nl-nome").focus(); return; }
+      const svc = acharServico($("#nl-svc").value);
+      S.leads.push({ id: "l" + Date.now(), nome, tel: $("#nl-tel").value || "—", origem: $("#nl-or").value, interesse: svc.nome, valor: svc.preco, etapa: "novo", atualizado: HOJE, prof: $("#nl-pro").value, motivo: "" });
+      fechar(); S.tela = "funil"; render(); toast("Contato adicionado em Novo contato");
+    };
+  });
+}
+
+/* ---------- Agenda ---------- */
+function telaAgenda() {
+  if (!S.diaAgenda) S.diaAgenda = diaFoco();
+  const dias = []; for (let d = -3; d <= 7; d++) { const x = addDias(HOJE, d); if (x.getDay() !== 0) dias.push(x); }
+  const doDia = agendaDo(S.diaAgenda);
+  const pend = doDia.filter(a => a.status === "pendente").length;
+  return topo("Agenda", `${fmtDia(S.diaAgenda)} · ${doDia.length} atendimentos${pend ? ` · ${pend} aguardando confirmação` : ""}`, `<button class="btn primary" id="novoAg">${I.mais}Novo agendamento</button>`) + `
+  <div class="days">${dias.map(d => `<button class="day ${difDias(d, HOJE) === 0 ? "today" : ""}" data-dia="${d.getTime()}" aria-pressed="${difDias(d, S.diaAgenda) === 0}"><span class="dw">${semana(d)}</span><span class="dn">${d.getDate()}</span><span class="dc">${agendaDo(d).length} atend.</span></button>`).join("")}</div>
+  <div class="pros">${equipeAtiva().map(p => {
+    const ap = doDia.filter(a => a.prof === p.nome);
+    return `<div class="panel"><div class="pro-head"><span class="avatar">${iniciais(p.nome)}</span><div><div class="n">${esc(p.nome)}</div><div class="a">${esc(p.area)}</div></div></div>
+      <div class="list" style="gap:4px">${ap.map(a => `<div class="appt s-${a.status}" data-ag="${a.id}"><span class="time">${a.hora}</span><div style="min-width:0"><div class="who">${esc(a.paciente)}</div><div class="what">${esc(a.servico)} · ${STATUS_TXT[a.status]}</div></div></div>`).join("") || '<div class="empty">Agenda livre</div>'}</div></div>`;
+  }).join("")}</div>`;
+}
+function abrirAgendamento(id) {
+  const a = S.agenda.find(x => x.id === id);
+  const lembrete = `Olá, ${a.paciente.split(" ")[0]}! Aqui é da ${CONFIG.nome}. Confirmando seu horário de ${a.servico.toLowerCase()} em ${fmtDia(a.data)} às ${a.hora} com ${a.prof}. Posso confirmar?`;
+  modal(`${a.hora} · ${a.paciente}`, `<div class="form">
+    <div class="field full note"><b>${esc(a.servico)}</b> com ${esc(a.prof)} em ${fmtDia(a.data)}</div>
+    <div class="field full"><label for="ag-st">Situação</label><select class="input" id="ag-st">${Object.keys(STATUS_TXT).map(k => `<option value="${k}" ${k === a.status ? "selected" : ""}>${STATUS_TXT[k]}</option>`).join("")}</select></div>
+  </div>`, `${btnWa(lembrete, "Pedir confirmação")}<button class="btn primary" id="ag-ok">Salvar</button>`, () => {
+    $("#ag-ok").onclick = () => { a.status = $("#ag-st").value; fechar(); render(); toast("Agendamento atualizado"); };
+  });
+}
+function novoAgendamento(paciente = "") {
+  const base = S.diaAgenda || diaFoco();
+  modal("Novo agendamento", `<div class="form">
+    <div class="field full"><label for="na-pac">Paciente</label><input class="input" id="na-pac" list="na-lista" value="${esc(paciente)}" placeholder="Digite o nome"><datalist id="na-lista">${S.pacientes.map(p => `<option value="${esc(p.nome)}">`).join("")}</datalist></div>
+    <div class="field"><label for="na-data">Data</label><input class="input" id="na-data" type="date" value="${new Date(base.getTime() - base.getTimezoneOffset() * 60000).toISOString().slice(0, 10)}"></div>
+    <div class="field"><label for="na-hora">Horário</label><input class="input" id="na-hora" type="time" value="10:00" step="900"></div>
+    <div class="field"><label for="na-pro">Profissional</label><select class="input" id="na-pro">${optList(equipeAtiva().map(p => p.nome))}</select></div>
+    <div class="field"><label for="na-svc">Procedimento</label><select class="input" id="na-svc">${optList(servicosAtivos().map(s => s.nome))}</select></div>
+  </div>`, `<button class="btn" id="cancel">Cancelar</button><button class="btn primary" id="na-ok">Agendar</button>`, () => {
+    $("#cancel").onclick = fechar;
+    $("#na-ok").onclick = () => {
+      const pac = $("#na-pac").value.trim(); if (!pac) { toast("Informe o paciente"); $("#na-pac").focus(); return; }
+      const data = dia0(new Date($("#na-data").value + "T12:00"));
+      S.agenda.push({ id: "a" + Date.now(), data, hora: $("#na-hora").value || "10:00", paciente: pac, servico: $("#na-svc").value, prof: $("#na-pro").value, status: "pendente" });
+      S.diaAgenda = data; S.tela = "agenda"; fechar(); render(); toast("Horário reservado. Falta confirmar com o paciente");
+    };
+  });
+}
+
+/* ---------- Retornos ---------- */
+function telaRetornos() {
+  const todos = retornos();
+  const grupos = [
+    { t: "Vencidos", cls: "bad", itens: todos.filter(x => x.r.dias < 0) },
+    { t: "Vencem nos próximos 7 dias", cls: "warn", itens: todos.filter(x => x.r.dias >= 0 && x.r.dias <= 7) },
+    { t: "Vencem em até 30 dias", cls: "info", itens: todos.filter(x => x.r.dias > 7) }
+  ];
+  const pend = todos.filter(x => !x.p.contatado);
+  return topo("Retornos", `Pacientes que já deveriam voltar · ${reais(pend.reduce((s, x) => s + x.r.preco, 0))} em procedimentos para recuperar`) + grupos.map(g => `
+  <div class="panel">
+    <div class="group-title"><span class="pill ${g.cls}">${g.t}</span><span class="count">${g.itens.length} pacientes</span></div>
+    <div class="list">${g.itens.map(({ p, r }) => `
+      <div class="row ret-row ${p.contatado ? "done" : ""}">
+        <div style="min-width:0"><div class="name">${esc(p.nome)}</div><div class="meta num">${p.tel}</div></div>
+        <div class="hide-m" style="min-width:0"><div>${esc(r.svc)}</div><div class="meta num">Feito em ${fmtDataAno(r.feito)}</div></div>
+        <div><div class="num" style="font-weight:600">${fmtData(r.vence)}</div><div class="meta">${r.dias < 0 ? "venceu " + haDias(-r.dias) : r.dias === 0 ? "vence hoje" : "em " + r.dias + " dias"}</div></div>
+        <div class="acts">${p.contatado ? '<span class="pill ok">Contatado</span>' : `${btnWa(msg(CONFIG.mensagemRetorno, p.nome, r.svc), "Mensagem")}<button class="btn sm" data-contato="${p.id}">Marcar contatado</button>`}</div>
+      </div>`).join("") || '<div class="empty">Ninguém neste grupo.</div>'}
+    </div>
+  </div>`).join("");
+}
+
+/* ---------- Orçamentos ---------- */
+function telaOrcamentos() {
+  const f = S.filtroOrc;
+  const etapa = f === "aberto" ? "orcamento" : f === "fechado" ? "fechado" : "perdido";
+  const lista = S.leads.filter(l => l.etapa === etapa).sort((a, b) => a.atualizado - b.atualizado);
+  const abertos = S.leads.filter(l => l.etapa === "orcamento");
+  const fech = S.leads.filter(l => l.etapa === "fechado"), perd = S.leads.filter(l => l.etapa === "perdido");
+  const taxa = fech.length + perd.length ? Math.round(fech.length / (fech.length + perd.length) * 100) : 0;
+  const ticket = fech.length ? fech.reduce((s, l) => s + l.valor, 0) / fech.length : 0;
+  const motivos = MOTIVOS.map(m => ({ m, n: perd.filter(l => l.motivo === m).length })).filter(x => x.n);
+  return topo("Orçamentos", "Quem recebeu orçamento e ainda não decidiu") + `
+  <section class="kpis">
+    <div class="kpi"><span class="lbl">Em aberto</span><span class="val">${reais(abertos.reduce((s, l) => s + l.valor, 0))}</span><span class="det">${abertos.length} orçamentos</span></div>
+    <div class="kpi"><span class="lbl">Taxa de fechamento</span><span class="val">${taxa}%</span><span class="det">${fech.length} fechados de ${fech.length + perd.length} decididos</span></div>
+    <div class="kpi"><span class="lbl">Ticket médio</span><span class="val">${reais(ticket)}</span><span class="det">por tratamento fechado</span></div>
+    <div class="kpi"><span class="lbl">Principal motivo de perda</span><span class="val" style="font-size:19px;line-height:1.3;padding-top:6px">${motivos.sort((a, b) => b.n - a.n)[0]?.m || "—"}</span><span class="det">${perd.length} perdidos</span></div>
+  </section>
+  <div class="toolbar"><div class="tabs" role="group" aria-label="Filtrar orçamentos">
+    <button data-forc="aberto" aria-pressed="${f === "aberto"}">Em aberto (${abertos.length})</button>
+    <button data-forc="fechado" aria-pressed="${f === "fechado"}">Fechados (${fech.length})</button>
+    <button data-forc="perdido" aria-pressed="${f === "perdido"}">Perdidos (${perd.length})</button></div></div>
+  <div class="panel"><div class="list">${lista.map(l => {
+    const t = temperatura(l), d = difDias(HOJE, l.atualizado);
+    return `<div class="row orc-row">
+      <div style="min-width:0"><div class="name">${esc(l.nome)}</div><div class="meta">${l.origem} · ${esc(l.prof)}</div></div>
+      <div class="hide-m">${esc(l.interesse)}</div>
+      <div class="num" style="font-weight:700">${reais(l.valor)}</div>
+      <div>${f === "aberto" ? `<span class="pill ${t.cls}">${t.txt}</span><div class="meta">enviado ${haDias(d)}</div>` : f === "perdido" ? `<span class="meta">${esc(l.motivo)}</span>` : `<span class="meta">fechado ${haDias(d)}</span>`}</div>
+      <div class="acts">${f === "aberto" ? `${btnWa(msg(CONFIG.mensagemOrcamento, l.nome, l.interesse), "Recontato")}<button class="btn sm" data-fechou="${l.id}">Fechou</button><button class="btn sm" data-perdeu="${l.id}">Perdeu</button>` : `<button class="btn sm" data-reabrir="${l.id}">Reabrir</button>`}</div>
+    </div>`;
+  }).join("") || '<div class="empty">Nenhum orçamento aqui.</div>'}</div></div>`;
+}
+
+/* ---------- Personalizar ---------- */
+const CORES = ["#1f6b75", "#2f5d8a", "#6b4c8a", "#a23b5e", "#b3623a", "#3d7a4f", "#7a6a3a", "#33393d"];
+function telaConfig() {
+  return topo("Personalizar", "Ajuste a demonstração para a clínica que você vai visitar") + `
+  <div class="note"><b>Como usar:</b> as mudanças desta tela valem só enquanto a página estiver aberta. Para deixar fixo na versão de uma clínica, altere o bloco <code>CONFIG</code> no início do arquivo HTML.</div>
+  <div class="panel"><h3>Identidade</h3><div class="form">
+    <div class="field"><label for="cf-nome">Nome da clínica</label><input class="input" id="cf-nome" value="${esc(CONFIG.nome)}"></div>
+    <div class="field"><label for="cf-sub">Subtítulo</label><input class="input" id="cf-sub" value="${esc(CONFIG.subtitulo)}"></div>
+    <div class="field"><label for="cf-seg">Tipo de clínica</label><select class="input" id="cf-seg">
+      <option value="ambos" ${CONFIG.segmento === "ambos" ? "selected" : ""}>Estética e odontologia</option>
+      <option value="estetica" ${CONFIG.segmento === "estetica" ? "selected" : ""}>Só estética</option>
+      <option value="odonto" ${CONFIG.segmento === "odonto" ? "selected" : ""}>Só odontologia</option></select></div>
+    <div class="field"><label for="cf-cor">Cor principal</label><div class="swatches">${CORES.map(c => `<button class="sw" style="background:${c}" data-cor="${c}" aria-label="Cor ${c}" aria-pressed="${c === CONFIG.cor}"></button>`).join("")}<input type="color" id="cf-cor" value="${CONFIG.cor}" aria-label="Escolher outra cor" style="width:38px;height:32px;border:0;background:none;padding:0;cursor:pointer"></div></div>
+  </div></div>
+  <div class="panel"><h3>Equipe</h3><div class="list" id="cf-team" style="gap:8px">${CONFIG.equipe.map((p, i) => `<div class="team-row">
+      <input class="input" id="cf-tn${i}" value="${esc(p.nome)}" aria-label="Nome">
+      <input class="input" id="cf-ta${i}" value="${esc(p.area)}" aria-label="Área">
+      <select class="input seg-sel" id="cf-ts${i}" aria-label="Segmento"><option value="estetica" ${p.seg === "estetica" ? "selected" : ""}>Estética</option><option value="odonto" ${p.seg === "odonto" ? "selected" : ""}>Odontologia</option></select>
+      <button class="x" data-rm="${i}" aria-label="Remover ${esc(p.nome)}">×</button></div>`).join("")}</div>
+    <div style="margin-top:10px"><button class="btn sm" id="cf-add">${I.mais}Adicionar profissional</button></div></div>
+  <div class="panel"><h3>Mensagens de WhatsApp</h3><div class="form">
+    <div class="field full"><label for="cf-mr">Lembrete de retorno</label><textarea class="input" id="cf-mr" rows="3">${esc(CONFIG.mensagemRetorno)}</textarea></div>
+    <div class="field full"><label for="cf-mo">Recontato de orçamento</label><textarea class="input" id="cf-mo" rows="3">${esc(CONFIG.mensagemOrcamento)}</textarea></div>
+    <div class="field full meta">Use {nome}, {clinica} e {procedimento} que o sistema troca automaticamente.</div>
+  </div></div>
+  <div class="top-actions"><button class="btn primary" id="cf-ok">Aplicar e recriar dados de exemplo</button></div>`;
+}
+function lerEquipe() {
+  return CONFIG.equipe.map((_, i) => ({ nome: $("#cf-tn" + i).value.trim() || "Profissional", area: $("#cf-ta" + i).value.trim(), seg: $("#cf-ts" + i).value }));
+}
+function ligarConfig() {
+  document.querySelectorAll("[data-cor]").forEach(b => b.onclick = () => { CONFIG.cor = b.dataset.cor; $("#cf-cor").value = CONFIG.cor; aplicarMarca(); document.querySelectorAll("[data-cor]").forEach(x => x.setAttribute("aria-pressed", x === b)); });
+  $("#cf-cor").oninput = e => { CONFIG.cor = e.target.value; aplicarMarca(); };
+  $("#cf-add").onclick = () => { CONFIG.equipe = lerEquipe(); CONFIG.equipe.push({ nome: "Novo profissional", area: "", seg: CONFIG.segmento === "odonto" ? "odonto" : "estetica" }); render(); };
+  document.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { CONFIG.equipe = lerEquipe(); if (CONFIG.equipe.length <= 1) { toast("A clínica precisa de pelo menos um profissional"); return; } CONFIG.equipe.splice(+b.dataset.rm, 1); render(); });
+  $("#cf-ok").onclick = () => {
+    CONFIG.nome = $("#cf-nome").value.trim() || CONFIG.nome;
+    CONFIG.subtitulo = $("#cf-sub").value.trim();
+    CONFIG.segmento = $("#cf-seg").value;
+    CONFIG.equipe = lerEquipe();
+    CONFIG.mensagemRetorno = $("#cf-mr").value; CONFIG.mensagemOrcamento = $("#cf-mo").value;
+    if (!equipeAtiva().length) { toast("Cadastre pelo menos um profissional desse tipo de clínica"); return; }
+    gerarDados(); aplicarMarca(); S.tela = "geral"; render(); toast("Demonstração atualizada");
+  };
+}
+
+/* ---------- render ---------- */
+function render() {
+  menu();
+  const telas = { geral: telaGeral, pacientes: telaPacientes, funil: telaFunil, agenda: telaAgenda, retornos: telaRetornos, orcamentos: telaOrcamentos, config: telaConfig };
+  $("#view").innerHTML = telas[S.tela]();
+  if (S.tela === "funil") { ligarFunil(); $("#novoLead").onclick = novoLead; }
+  if (S.tela === "pacientes") {
+    $("#novoPac").onclick = novoPaciente;
+    const b = $("#busca"); b.oninput = () => { S.busca = b.value; const pos = b.selectionStart; render(); const nb = $("#busca"); nb.focus(); nb.setSelectionRange(pos, pos); };
+    document.querySelectorAll("[data-pac]").forEach(r => r.onclick = () => fichaPaciente(r.dataset.pac));
+  }
+  if (S.tela === "agenda") {
+    $("#novoAg").onclick = () => novoAgendamento();
+    document.querySelectorAll("[data-dia]").forEach(b => b.onclick = () => { S.diaAgenda = new Date(+b.dataset.dia); render(); });
+    document.querySelectorAll("[data-ag]").forEach(r => r.onclick = () => abrirAgendamento(r.dataset.ag));
+  }
+  if (S.tela === "retornos") document.querySelectorAll("[data-contato]").forEach(b => b.onclick = () => { S.pacientes.find(p => p.id === b.dataset.contato).contatado = true; render(); toast("Marcado como contatado"); });
+  if (S.tela === "orcamentos") {
+    document.querySelectorAll("[data-forc]").forEach(b => b.onclick = () => { S.filtroOrc = b.dataset.forc; render(); });
+    document.querySelectorAll("[data-fechou]").forEach(b => b.onclick = () => { const l = S.leads.find(x => x.id === b.dataset.fechou); l.etapa = "fechado"; l.atualizado = HOJE; render(); toast(`${reais(l.valor)} fechado com ${l.nome.split(" ")[0]}`); });
+    document.querySelectorAll("[data-perdeu]").forEach(b => b.onclick = () => abrirLead(b.dataset.perdeu, "perdido"));
+    document.querySelectorAll("[data-reabrir]").forEach(b => b.onclick = () => { const l = S.leads.find(x => x.id === b.dataset.reabrir); l.etapa = "orcamento"; l.motivo = ""; l.atualizado = HOJE; render(); toast("Orçamento reaberto"); });
+  }
+  if (S.tela === "config") ligarConfig();
+}
+
+gerarDados();
+aplicarMarca();
+render();
+</script>
+
+<style>.ps-back{position:fixed;right:16px;bottom:16px;z-index:9999;display:flex;gap:6px;font:600 13px/1 Inter,system-ui,sans-serif}
+.ps-back a{display:inline-flex;align-items:center;gap:6px;padding:11px 15px;border-radius:999px;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.ps-back .b1{background:#021442;color:#fff}.ps-back .b2{background:#1f9d55;color:#fff}
+@media (max-width:820px){.ps-back{bottom:calc(78px + env(safe-area-inset-bottom,0px));right:10px}.ps-back a{padding:9px 12px;font-size:12px}}</style>
+<div class="ps-back"><a class="b1" href="../index.html">&larr; Voltar ao site</a><a class="b2" href="../index.html#contato">Quero um assim</a></div>
+</body></html>

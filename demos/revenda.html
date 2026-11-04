@@ -1,0 +1,777 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Pátio CRM Demo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: painel de revenda — trilho lateral "asfalto" + área de trabalho clara; no celular o trilho vira barra inferior */
+:root{
+  --bg:#f3f3f0; --surface:#ffffff; --surface-2:#f7f7f4; --line:#e2e1db; --fg:#1d1f22; --muted:#6b6d70;
+  --side:#1c1e21; --side-fg:#e4e4df; --side-muted:#8a8c8f; --side-active:#2b2e32;
+  --accent:#e8a317; --accent-ink:#1c1e21; --accent-soft:#fbefd2;
+  --good:#2f8f5b; --warn:#c77a12; --bad:#c43d3d; --info:#2f63b5; --violet:#7b5cc7;
+  --tire:#1a1b1d; --rim:#c9ccd0; --glass:#2a3440;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121315; --surface:#1b1d20; --surface-2:#22252a; --line:#30333a; --fg:#ececea; --muted:#9a9c9f;
+  --side:#0c0d0e; --side-fg:#e4e4df; --side-muted:#7c7e81; --side-active:#1f2124;
+  --accent-soft:#3a2f17;
+  --good:#5cc289; --warn:#e9a24a; --bad:#ec7575; --info:#7aa6ee; --violet:#a58ff0;
+  --tire:#050506; --rim:#8e9399; --glass:#33404e;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121315; --surface:#1b1d20; --surface-2:#22252a; --line:#30333a; --fg:#ececea; --muted:#9a9c9f;
+  --side:#0c0d0e; --side-fg:#e4e4df; --side-muted:#7c7e81; --side-active:#1f2124;
+  --accent-soft:#3a2f17;
+  --good:#5cc289; --warn:#e9a24a; --bad:#ec7575; --info:#7aa6ee; --violet:#a58ff0;
+  --tire:#050506; --rim:#8e9399; --glass:#33404e;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100%;background:linear-gradient(to right,var(--side) 232px,transparent 232px)}
+.side{background:var(--side);color:var(--side-fg);padding:22px 14px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px;min-width:0}
+.brand-mark{width:36px;height:36px;border-radius:8px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:21px;flex:none}
+.brand-name{font-family:var(--f-display);font-size:20px;font-weight:700;letter-spacing:.03em;line-height:1.05;text-transform:uppercase;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.brand-sub{font-size:11px;color:var(--side-muted);text-transform:uppercase;letter-spacing:.12em}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:7px;color:var(--side-muted);font-weight:500}
+.nav button:hover{color:var(--side-fg)}
+.nav button:focus-visible{outline:2px solid var(--accent)}
+.nav button[aria-current="page"]{background:var(--side-active);color:var(--side-fg);box-shadow:inset 3px 0 0 var(--accent)}
+.nav svg{width:19px;height:19px;flex:none}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:12px;padding:0 8px}
+.user{display:flex;align-items:center;gap:10px;font-size:13px}
+.user b{display:block;color:var(--side-fg);font-weight:600}
+.user span{color:var(--side-muted)}
+.linkbtn{all:unset;cursor:pointer;color:var(--side-muted);font-size:13px}
+.linkbtn:hover{color:var(--side-fg)}
+.linkbtn:focus-visible{outline:2px solid var(--accent)}
+
+.main{min-width:0;padding-block:24px 48px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600}
+h1{font-family:var(--f-display);font-size:34px;font-weight:700;margin:2px 0 0;line-height:1.05;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:20px;font-weight:600;margin:0;letter-spacing:.01em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;font-weight:600;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover{filter:brightness(1.06);border-color:var(--accent)}
+.btn-sm{padding:5px 10px;font-size:13px}
+.btn-wa{background:#1f9d55;border-color:#1f9d55;color:#fff}
+.btn-wa:hover{filter:brightness(1.07);border-color:#1f9d55}
+.btn svg{width:16px;height:16px}
+
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:7px 13px;font-weight:600;color:var(--muted);font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+
+.grid{display:grid;gap:16px}
+.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.panel-head small{color:var(--muted);font-size:13px}
+.kpi .label{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600}
+.kpi .value{font-family:var(--f-display);font-size:36px;font-weight:700;line-height:1.1;margin-top:4px}
+.kpi .delta{font-size:13px;color:var(--muted)}
+.up{color:var(--good);font-weight:600}
+.two{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+
+/* Assistente IA */
+.ai{border-color:color-mix(in srgb,var(--accent) 55%,var(--line));background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 7%,var(--surface)),var(--surface) 60%);margin-top:16px}
+.ai-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.ai-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-display);font-size:20px;font-weight:700}
+.ai-badge svg{width:22px;height:22px;color:var(--accent)}
+.ai-head small{color:var(--muted);font-size:13px}
+.live{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px color-mix(in srgb,var(--good) 22%,transparent)}
+.ai-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px}
+.insights{display:flex;flex-direction:column;gap:8px}
+.insight{display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px 10px 0;overflow:hidden}
+.insight .stripe{align-self:stretch;margin:-10px 0}
+.insight p{margin:0;font-size:14px}
+.insight p b{font-weight:600}
+.insight .kind{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;display:block;margin-bottom:1px}
+.ask{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.qchips{display:flex;flex-wrap:wrap;gap:6px}
+.qchips button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:500;text-align:left}
+.qchips button:hover,.qchips button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.answer{font-size:14px;min-height:84px;line-height:1.5}
+.answer .who{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px}
+.answer .who svg{width:14px;height:14px;color:var(--accent)}
+.caret{display:inline-block;width:7px;height:15px;background:var(--accent);vertical-align:-2px;margin-left:2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+.funnel{display:flex;flex-direction:column;gap:9px}
+.frow{display:grid;grid-template-columns:120px minmax(0,1fr) 44px;align-items:center;gap:10px;font-size:14px}
+.ftrack{height:24px;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.fbar{height:100%;border-radius:5px;transition:width .4s ease}
+.frow b{text-align:right;font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-direction:column;gap:8px;font-size:14px}
+.legend div{display:flex;align-items:center;gap:10px}
+.legend .sw{width:10px;height:10px;border-radius:3px;flex:none}
+.legend .lv{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--muted)}
+.donut-wrap{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tr[data-lead]:hover td{background:var(--surface-2)}
+.tscroll{overflow-x:auto}
+.right{text-align:right}
+.rank{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;background:var(--surface-2);font-weight:600;font-size:13px}
+.rank.r1{background:var(--accent);color:var(--accent-ink)}
+.meter{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;min-width:60px}
+.meter i{display:block;height:100%;background:var(--accent)}
+
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;color:#fff;white-space:nowrap}
+.plate{display:inline-flex;flex-direction:column;align-items:center;font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;border:1.5px solid var(--fg);border-radius:4px;background:#fff;color:#111;overflow:hidden;line-height:1}
+.plate i{display:block;width:100%;height:5px;background:#2f63b5}
+.plate span{padding:2px 7px 3px}
+
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.search{flex:1;min-width:170px;max-width:320px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 12px}
+.filterchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--bad);color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent);border-radius:999px;padding:4px 6px 4px 12px;font-size:13px;font-weight:600}
+.filterchip button{border:0;background:none;color:inherit;font-size:16px;line-height:1;padding:0 4px}
+.hint{font-size:13px;color:var(--muted)}
+
+.kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:12px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x proximity}
+.col{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:220px;scroll-snap-align:start}
+.col.drop{outline:2px dashed var(--accent);outline-offset:-4px;background:var(--accent-soft)}
+.col-head{display:flex;align-items:center;gap:8px;padding:2px 4px 6px;font-family:var(--f-display);font-size:16px;font-weight:600}
+.col-head .dot{width:9px;height:9px;border-radius:50%}
+.col-head .count{margin-left:auto;font-family:var(--f-body);font-size:12px;color:var(--muted);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:7px;cursor:grab;text-align:left;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+.card:hover{border-color:var(--muted)}
+.card.dragging{opacity:.35}
+.ghost{position:fixed;z-index:70;pointer-events:none;transform:rotate(2deg) scale(1.02);box-shadow:0 14px 34px rgba(0,0,0,.28);margin:0}
+.card .name{font-weight:600}
+.card .car{font-size:13px;color:var(--muted)}
+.card .meta{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.tags{display:flex;gap:4px;flex-wrap:wrap}
+.stale{color:var(--bad);font-weight:600}
+.avatar{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;font-size:10px;font-weight:700;color:#fff;flex:none}
+
+.agenda{display:flex;flex-direction:column;gap:16px}
+.day h3{font-family:var(--f-display);font-size:17px;margin:0 0 8px;font-weight:600}
+.slot{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.slot + .slot{margin-top:6px}
+.slot time{font-family:var(--f-display);font-size:20px;font-weight:600}
+.slot .who{font-weight:600}
+.slot .what{font-size:13px;color:var(--muted)}
+
+.cars{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+.carcard{display:flex;flex-direction:column;gap:10px}
+.carimg{aspect-ratio:16/8;max-width:100%;border-radius:8px;background:radial-gradient(ellipse at 50% 85%,color-mix(in srgb,var(--fg) 6%,transparent),transparent 70%),var(--surface-2);display:grid;place-items:center;overflow:hidden}
+.carimg svg{width:84%;height:auto}
+.carcard h3{margin:0;font-family:var(--f-display);font-size:20px;font-weight:600}
+.specs{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.price{font-family:var(--f-display);font-size:24px;font-weight:700}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.steps{display:flex;gap:4px}
+.steps i{flex:1;height:5px;border-radius:3px;background:var(--line)}
+.steps i.on{background:var(--accent)}
+
+.goal-big{font-family:var(--f-display);font-size:52px;font-weight:700;line-height:1}
+.bar-goal{height:14px;background:var(--surface-2);border-radius:7px;overflow:hidden;margin:12px 0 6px;position:relative}
+.bar-goal i{display:block;height:100%;background:var(--accent);border-radius:7px}
+
+/* drawer & modal */
+.scrim{position:fixed;inset:0;background:rgba(10,10,12,.45);z-index:40}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(450px,100%);background:var(--surface);border-left:1px solid var(--line);z-index:41;overflow-y:auto;padding:calc(22px + env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) 22px;display:flex;flex-direction:column;gap:18px}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(460px,calc(100% - 32px));max-height:calc(100% - 40px);overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;z-index:41;padding:22px;display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label,.field .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.field input,.field select{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:9px 11px;min-width:0}
+.fields2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.close{border:0;background:none;font-size:26px;line-height:1;color:var(--muted);padding:0 4px}
+.tagpick{display:flex;flex-wrap:wrap;gap:6px}
+.tagpick button{border:1px solid var(--line);background:var(--surface);border-radius:5px;padding:3px 9px;font-size:12px;font-weight:600}
+.tagpick button[aria-pressed="true"]{color:#fff;border-color:transparent}
+.interest{display:grid;grid-template-columns:minmax(0,1fr) 130px;gap:10px;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.interest svg{width:100%;height:auto}
+.wa-box{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.tpl{display:flex;flex-wrap:wrap;gap:6px}
+.tpl button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600}
+.tpl button[aria-pressed="true"]{border-color:#1f9d55;background:color-mix(in srgb,#1f9d55 14%,transparent)}
+.bubble{background:color-mix(in srgb,#1f9d55 12%,var(--surface));border-radius:10px 10px 2px 10px;padding:10px 12px;font-size:14px;align-self:flex-end;max-width:92%;white-space:pre-line}
+.timeline{display:flex;flex-direction:column;gap:10px;font-size:14px;border-left:2px solid var(--line);padding-left:14px}
+.timeline small{display:block;color:var(--muted);font-size:12px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:8px;font-weight:600;z-index:90;font-size:14px;max-width:calc(100% - 32px);text-align:center}
+.err{color:var(--bad);font-size:13px}
+
+/* Login / personalização */
+.login{position:fixed;inset:0;z-index:80;background:var(--bg);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);overflow-y:auto}
+.login-art{background:var(--side);color:var(--side-fg);padding:calc(44px + env(safe-area-inset-top,0px)) 48px calc(44px + env(safe-area-inset-bottom,0px)) max(48px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;justify-content:space-between;gap:28px;min-height:100%}
+.login-art h2{font-size:42px;line-height:1.02;font-weight:700;text-wrap:balance;max-width:16ch}
+.login-art .lead{color:var(--side-muted);font-size:16px;max-width:42ch;margin:12px 0 0}
+.login-car{max-width:520px}
+.login-car svg{width:100%;height:auto}
+.feats{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;color:var(--side-muted)}
+.feats span{display:flex;align-items:center;gap:8px}
+.feats i{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.login-form{display:flex;align-items:center;justify-content:center;padding:calc(32px + env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) 24px}
+.login-form form{width:min(380px,100%);display:flex;flex-direction:column;gap:14px}
+.login-form h1{font-size:30px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.swatches button{width:38px;height:38px;border-radius:9px;border:2px solid transparent;padding:0;display:grid;place-items:center}
+.swatches button[aria-pressed="true"]{border-color:var(--fg)}
+.swatches button span{width:26px;height:26px;border-radius:6px;display:block}
+.preview-brand{display:flex;align-items:center;gap:10px;background:var(--side);color:var(--side-fg);border-radius:10px;padding:10px 12px}
+.divider{height:1px;background:var(--line);margin:4px 0}
+.fine{font-size:12px;color:var(--muted);text-align:center}
+
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.two,.ai-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:860px){.login{grid-template-columns:minmax(0,1fr)}.login-art{min-height:0;padding:calc(28px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) 28px max(20px,env(safe-area-inset-left,0px));gap:18px}.login-art h2{font-size:32px}.login-car,.feats{display:none}.login-form{align-items:flex-start;padding-top:28px}}
+@media (max-width:760px){
+  .app{grid-template-columns:minmax(0,1fr);background:none}
+  .side{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;z-index:30;flex-direction:row;padding:6px max(8px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-right,0px))}
+  .brand,.side-foot{display:none}
+  .nav{flex-direction:row;flex:1;justify-content:space-around}
+  .nav button{flex-direction:column;gap:3px;padding:6px 2px;font-size:11px;flex:1;justify-content:center;text-align:center}
+  .nav button[aria-current="page"]{box-shadow:inset 0 3px 0 var(--accent)}
+  .main{padding-block:18px 100px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .mtop{display:flex!important}
+  h1{font-size:28px}
+  .kpi .value{font-size:30px}
+  .panel{padding:14px}
+  .frow{grid-template-columns:96px minmax(0,1fr) 36px}
+  .fields2{grid-template-columns:1fr}
+  .slot{grid-template-columns:52px minmax(0,1fr)}
+  .slot .chip{grid-column:2;justify-self:start}
+  .hide-sm{display:none}
+  .kanban{grid-auto-columns:82%}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .insight{grid-template-columns:4px minmax(0,1fr)}
+  .insight .btn{grid-column:2;justify-self:start}
+  .interest{grid-template-columns:minmax(0,1fr) 100px}
+}
+.mtop{display:none;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.mtop .brand{display:flex!important;min-width:0}
+.mtop .brand-name{-webkit-line-clamp:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="brand-mark" data-brand-mark>P</div><div style="min-width:0"><div class="brand-name" data-brand-name>Pátio</div><div class="brand-sub">CRM para revendas</div></div></div>
+    <nav class="nav" id="nav" aria-label="Seções"></nav>
+    <div class="side-foot">
+      <div class="user"><span class="avatar" style="background:var(--accent);color:var(--accent-ink);width:30px;height:30px;font-size:12px">GE</span><div><b>Gerente</b><span>Acesso: administrador</span></div></div>
+      <button class="linkbtn" id="sair">Sair e personalizar a marca</button>
+    </div>
+  </aside>
+  <main class="main"><div class="mtop"><div class="brand" style="padding:0"><div class="brand-mark" data-brand-mark>P</div><div class="brand-name" data-brand-name style="font-size:20px">Pátio</div></div><button class="btn btn-sm" id="sair-m">Personalizar</button></div><div id="main"></div></main>
+</div>
+<div id="layer"></div>
+<div id="login-layer"></div>
+
+<script>
+// ================= Dados de exemplo (fictícios) =================
+const ETAPAS=[
+  {id:"novo",nome:"Novo lead",cor:"var(--info)"},
+  {id:"qualificado",nome:"Qualificado",cor:"var(--violet)"},
+  {id:"visita",nome:"Visita agendada",cor:"var(--warn)"},
+  {id:"negociacao",nome:"Negociação",cor:"var(--accent)"},
+  {id:"vendido",nome:"Vendido",cor:"var(--good)"},
+  {id:"perdido",nome:"Perdido",cor:"var(--bad)"}
+];
+const VEND=[{id:"ana",nome:"Ana Ribeiro",cor:"#2f63b5"},{id:"bruno",nome:"Bruno Kessler",cor:"#2f8f5b"},{id:"diego",nome:"Diego Moraes",cor:"#a2489c"}];
+const ORIGENS=[{nome:"WhatsApp",cor:"#2f8f5b",base:196},{nome:"Instagram",cor:"#c2477a",base:128},{nome:"Facebook",cor:"#2f63b5",base:74},{nome:"Webmotors",cor:"#d0661c",base:61},{nome:"Loja (walk-in)",cor:"#7a7c80",base:28}];
+let TAGS=[{id:"t1",nome:"Troca",cor:"#2f63b5"},{id:"t2",nome:"Financiamento",cor:"#7b5cc7"},{id:"t3",nome:"Pré-aprovado",cor:"#2f8f5b"},{id:"t4",nome:"Follow-up",cor:"#c77a12"},{id:"t5",nome:"Urgente",cor:"#c43d3d"},{id:"t6",nome:"À vista",cor:"#3c7d7d"}];
+let LEADS=[
+  {id:1,nome:"Mariana Costa",tel:"(51) 9 8812-4410",carro:"Jeep Compass Longitude 2021",cor:"#3a4a5c",valor:139900,origem:"Instagram",etapa:"negociacao",vend:"ana",dias:1,tags:["t1","t2"]},
+  {id:2,nome:"Rafael Nunes",tel:"(51) 9 9104-2277",carro:"Toyota Corolla XEi 2020",cor:"#b8bcc2",valor:112500,origem:"WhatsApp",etapa:"visita",vend:"bruno",dias:0,tags:["t6"]},
+  {id:3,nome:"Juliana Prates",tel:"(51) 9 8456-0091",carro:"VW T-Cross Highline 2022",cor:"#8c2f2f",valor:128900,origem:"Webmotors",etapa:"qualificado",vend:"diego",dias:2,tags:["t2"]},
+  {id:4,nome:"Carlos Eduardo Lima",tel:"(51) 9 9377-1820",carro:"Fiat Toro Volcano 2021",cor:"#e8e8e4",valor:134000,origem:"Facebook",etapa:"novo",vend:null,dias:0,tags:[]},
+  {id:5,nome:"Patrícia Alves",tel:"(51) 9 8120-5534",carro:"Honda HR-V EXL 2019",cor:"#2b2d31",valor:104900,origem:"WhatsApp",etapa:"novo",vend:null,dias:1,tags:["t5"]},
+  {id:6,nome:"Thiago Becker",tel:"(51) 9 9902-6618",carro:"Chevrolet Onix LTZ 2022",cor:"#c43d3d",valor:84900,origem:"Instagram",etapa:"qualificado",vend:"ana",dias:4,tags:["t4"]},
+  {id:7,nome:"Fernanda Rocha",tel:"(51) 9 8233-7745",carro:"Hyundai Creta Platinum 2023",cor:"#e8e8e4",valor:146900,origem:"Loja (walk-in)",etapa:"vendido",vend:"bruno",dias:0,tags:["t3"]},
+  {id:8,nome:"Lucas Martins",tel:"(51) 9 9541-3302",carro:"Renault Duster Iconic 2021",cor:"#5d6166",valor:96500,origem:"Webmotors",etapa:"perdido",vend:"diego",dias:6,tags:[],motivo:"Achou mais barato"},
+  {id:9,nome:"Aline Schmitt",tel:"(51) 9 8677-1209",carro:"VW Nivus Highline 2022",cor:"#2f4f7f",valor:118000,origem:"Facebook",etapa:"visita",vend:"ana",dias:1,tags:["t1"]},
+  {id:10,nome:"Gabriel Fontana",tel:"(51) 9 9218-4456",carro:"Toyota Hilux SRV 2019",cor:"#9aa0a6",valor:219900,origem:"WhatsApp",etapa:"negociacao",vend:"bruno",dias:3,tags:["t2","t4"]},
+  {id:11,nome:"Camila Duarte",tel:"(51) 9 8390-2871",carro:"Fiat Pulse Impetus 2023",cor:"#c43d3d",valor:99900,origem:"Instagram",etapa:"novo",vend:null,dias:0,tags:[]},
+  {id:12,nome:"Rodrigo Sanches",tel:"(51) 9 9655-0134",carro:"Jeep Renegade Sport 2020",cor:"#4d5a3a",valor:89900,origem:"WhatsApp",etapa:"vendido",vend:"ana",dias:0,tags:["t6"]},
+  {id:13,nome:"Beatriz Mello",tel:"(51) 9 8011-9963",carro:"Nissan Kicks SV 2021",cor:"#b8bcc2",valor:94900,origem:"Webmotors",etapa:"qualificado",vend:"bruno",dias:5,tags:["t4"]},
+  {id:14,nome:"André Vieira",tel:"(51) 9 9783-2290",carro:"Chevrolet Tracker Premier 2022",cor:"#2b2d31",valor:124500,origem:"Facebook",etapa:"perdido",vend:"ana",dias:8,tags:[],motivo:"Crédito reprovado"},
+  {id:15,nome:"Larissa Hoffmann",tel:"(51) 9 8544-6170",carro:"Honda Civic Touring 2018",cor:"#e8e8e4",valor:117900,origem:"Instagram",etapa:"vendido",vend:"diego",dias:0,tags:["t3","t2"]}
+];
+const AGENDA=[
+  {dia:"Hoje · qui 29/10",itens:[
+    {h:"10:30",who:"Rafael Nunes",what:"Test-drive · Corolla XEi 2020",resp:"Bruno Kessler",tipo:"Visita"},
+    {h:"14:00",who:"Aline Schmitt",what:"Avaliação do usado para troca · Nivus 2022",resp:"Ana Ribeiro",tipo:"Avaliação"},
+    {h:"17:15",who:"Sr. Osvaldo Kunz",what:"Entrega de veículo para consignação · Corolla Cross 2022",resp:"Consignação",tipo:"Consignação"}]},
+  {dia:"Amanhã · sex 30/10",itens:[
+    {h:"09:00",who:"Gabriel Fontana",what:"Assinatura de contrato · Hilux SRV 2019",resp:"Bruno Kessler",tipo:"Fechamento"},
+    {h:"15:30",who:"Juliana Prates",what:"Visita à loja · T-Cross Highline 2022",resp:"Diego Moraes",tipo:"Visita"}]},
+  {dia:"Sáb 31/10",itens:[
+    {h:"11:00",who:"Mariana Costa",what:"Retorno da proposta de financiamento",resp:"Ana Ribeiro",tipo:"Follow-up"}]}
+];
+const CONSIG=[
+  {modelo:"Toyota Corolla Cross XRE 2022",tipo:"suv",placa:"IZT5H21",km:"38.400 km",corNome:"Prata",cor:"#a9aeb4",dono:"Osvaldo Kunz",preco:149900,fipe:152300,dias:3,etapa:1},
+  {modelo:"VW Amarok V6 Highline 2020",tipo:"pickup",placa:"JBR2C88",km:"71.200 km",corNome:"Cinza",cor:"#5d6166",dono:"Marta Engel",preco:209900,fipe:214800,dias:17,etapa:2},
+  {modelo:"BMW 320i GP 2019",tipo:"sedan",placa:"IXK9A04",km:"52.900 km",corNome:"Branco",cor:"#e6e7e3",dono:"Henrique Lopes",preco:159000,fipe:163500,dias:26,etapa:2},
+  {modelo:"Fiat Strada Volcano 2023",tipo:"pickup",placa:"JCA4D17",km:"18.600 km",corNome:"Vermelho",cor:"#b83434",dono:"Paulo Tessaro",preco:109900,fipe:111200,dias:9,etapa:1}
+];
+const CONSIG_ETAPAS=["Recebido","Anunciado","Em negociação","Vendido"];
+const TREND=[{m:"mai",v:14},{m:"jun",v:17},{m:"jul",v:16},{m:"ago",v:21},{m:"set",v:19},{m:"out",v:null}];
+const META=25, COMISSAO_VEND=1000, COMISSAO_SDR=300, TICKET=124300;
+// Volume do mês que não aparece como cartão (leads já encerrados), para os números baterem com uma revenda real
+const BASE={leadsMes:487,qualif:212,visita:71,negoc:38,vendas:{ana:8,bruno:7,diego:5},atend:{ana:58,bruno:52,diego:47}};
+const PERIODOS={hoje:{f:.045,nome:"Hoje",ctx:"hoje"},semana:{f:.25,nome:"Semana",ctx:"nesta semana"},mes:{f:1,nome:"Mês",ctx:"em outubro"}};
+const CORES={ambar:{nome:"Âmbar",a:"#e8a317",ink:"#1c1e21"},vermelho:{nome:"Vermelho",a:"#d63a3a",ink:"#ffffff"},azul:{nome:"Azul",a:"#2f6fd6",ink:"#ffffff"},verde:{nome:"Verde",a:"#23935a",ink:"#ffffff"}};
+
+// ================= Estado =================
+let brand={nome:"Pátio",cor:"ambar"};
+try{const b=JSON.parse(localStorage.getItem("patio-brand")||"null");if(b&&b.nome)brand=b}catch(e){}
+let view="geral", leadMode="kanban", busca="", periodo="mes", soParados=false, aiQ=null;
+let dragState=null, suppressClick=false, typer=null;
+const VIEWS=[{id:"geral",nome:"Visão geral"},{id:"leads",nome:"Leads"},{id:"agenda",nome:"Agenda"},{id:"consig",nome:"Consignados"},{id:"metas",nome:"Metas"}];
+let startHash="";try{startHash=location.hash.slice(1)}catch(e){}
+if(VIEWS.some(v=>v.id===startHash))view=startHash;
+
+// ================= Utilidades =================
+const $=s=>document.querySelector(s);
+const brl=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
+const pct=(v,d=1)=>v.toFixed(d).replace(".",",")+"%";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const vend=id=>VEND.find(v=>v.id===id);
+const etapa=id=>ETAPAS.find(e=>e.id===id);
+const tag=id=>TAGS.find(t=>t.id===id);
+const initials=n=>n.trim().split(/\s+/).map(p=>p[0]).slice(0,2).join("").toUpperCase();
+const av=id=>{const v=vend(id);return v?`<span class="avatar" style="background:${v.cor}" title="${esc(v.nome)}">${initials(v.nome)}</span>`:`<span class="avatar" style="background:var(--muted)" title="Sem vendedor">–</span>`};
+const ativo=l=>!["vendido","perdido"].includes(l.etapa);
+function tipoCarro(m){m=m.toLowerCase();if(/toro|hilux|strada|amarok|s10|ranger/.test(m))return"pickup";if(/corolla x|civic|320i|onix|cruze|jetta|sentra|versa|virtus|hb20s/.test(m))return"sedan";return"suv"}
+function toast(msg){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2400)}
+const ICONS={
+  geral:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-3H4zM14 7h6V4h-6z"/></svg>',
+  leads:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h4v14H4zM10 5h4v9h-4zM16 5h4v6h-4z"/></svg>',
+  agenda:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
+  consig:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 15l2-6a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 6v3h-3M3 15v3h3M3 15h18"/><circle cx="7.5" cy="18" r="1.8"/><circle cx="16.5" cy="18" r="1.8"/></svg>',
+  metas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>',
+  spark:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9zM19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z"/></svg>',
+  wa:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.2-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3z"/></svg>'
+};
+
+// ================= Ilustração dos carros (SVG) =================
+function carSvg(tipo,cor){
+  const S={
+    sedan:{body:"M18 66 L20 56 Q22 50 32 48 L66 44 L94 29 Q101 25 112 25 L150 25 Q161 25 169 31 L190 44 L214 48 Q225 51 226 59 L227 66 Q227 72 222 72 L24 72 Q18 72 18 66 Z",
+      win:["M101 31 Q105 29 113 29 L128 29 L128 44 L78 45 Z","M133 29 L150 29 Q158 29 164 34 L180 44 L133 44 Z"],w:[64,186],wy:72,r:15,door:[130,45,70],head:[212,52,222,57],tail:[19,54,23,60]},
+    suv:{body:"M17 70 L18 52 Q20 45 30 44 L60 42 L82 23 Q87 19 96 19 L170 19 Q181 19 187 25 L205 40 L217 44 Q227 47 227 57 L227 70 Q227 75 222 75 L22 75 Q17 75 17 70 Z",
+      win:["M90 25 L126 25 L126 41 L70 42 Z","M131 25 L168 25 Q176 25 181 30 L194 41 L131 41 Z"],w:[62,186],wy:75,r:17,door:[128,42,70],head:[214,48,224,54],tail:[18,48,22,56],rail:[96,16,172]},
+    pickup:{body:"M15 72 L15 50 L102 50 L104 23 Q106 18 113 18 L156 18 Q165 18 171 24 L191 43 L215 47 Q227 50 227 59 L227 72 Q227 77 222 77 L20 77 Q15 77 15 72 Z",
+      win:["M111 24 L150 24 L150 43 L109 43 Z","M155 24 Q164 24 168 29 L182 43 L155 43 Z"],w:[56,190],wy:77,r:17,door:[152,44,72],head:[215,51,225,57],tail:[15,52,19,60],bed:true}
+  }[tipo]||null;
+  if(!S)return"";
+  const wheel=x=>`<circle cx="${x}" cy="${S.wy}" r="${S.r+3}" fill="var(--tire)" opacity=".18"/><circle cx="${x}" cy="${S.wy}" r="${S.r}" fill="var(--tire)"/><circle cx="${x}" cy="${S.wy}" r="${S.r*.56}" fill="var(--rim)"/><circle cx="${x}" cy="${S.wy}" r="${S.r*.2}" fill="var(--tire)"/>`;
+  const [dx,dy1,dy2]=S.door,[hx1,hy1,hx2,hy2]=S.head,[tx1,ty1,tx2,ty2]=S.tail;
+  return `<svg viewBox="0 0 244 100" aria-hidden="true">
+    <ellipse cx="122" cy="${S.wy+S.r-1}" rx="104" ry="5" fill="var(--fg)" opacity=".12"/>
+    <path d="${S.body}" fill="${cor}"/>
+    <path d="${S.body}" fill="url(#shade)" />
+    ${S.win.map(p=>`<path d="${p}" fill="var(--glass)"/>`).join("")}
+    ${S.win.map(p=>`<path d="${p}" fill="#fff" opacity=".12" transform="translate(0,-1)"/>`).join("")}
+    <line x1="${dx}" y1="${dy1}" x2="${dx}" y2="${dy2}" stroke="#000" stroke-opacity=".22" stroke-width="1.2"/>
+    ${S.rail?`<line x1="${S.rail[0]}" y1="${S.rail[1]}" x2="${S.rail[2]}" y2="${S.rail[1]}" stroke="var(--tire)" stroke-width="3" stroke-linecap="round"/>`:""}
+    ${S.bed?`<line x1="17" y1="54" x2="100" y2="54" stroke="#000" stroke-opacity=".25" stroke-width="1.5"/>`:""}
+    <rect x="${hx1}" y="${hy1}" width="${hx2-hx1}" height="${hy2-hy1}" rx="2" fill="#fff6d6"/>
+    <rect x="${tx1}" y="${ty1}" width="${tx2-tx1}" height="${ty2-ty1}" rx="1.5" fill="#d33"/>
+    <rect x="${S.door[0]+10}" y="${S.door[1]+6}" width="9" height="2" rx="1" fill="#000" opacity=".3"/>
+    ${S.w.map(wheel).join("")}
+  </svg>`;
+}
+const SVG_DEFS=`<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs></svg>`;
+document.body.insertAdjacentHTML("beforeend",SVG_DEFS);
+
+// ================= Marca =================
+function applyBrand(){
+  const c=CORES[brand.cor]||CORES.ambar, r=document.documentElement.style;
+  r.setProperty("--accent",c.a);r.setProperty("--accent-ink",c.ink);r.setProperty("--accent-soft",`color-mix(in srgb, ${c.a} 18%, transparent)`);
+  document.querySelectorAll("[data-brand-name]").forEach(e=>e.textContent=brand.nome);
+  document.querySelectorAll("[data-brand-mark]").forEach(e=>e.textContent=initials(brand.nome).slice(0,1)||"P");
+}
+function showLogin(){
+  let tmp={...brand};
+  const L=$("#login-layer");
+  L.innerHTML=`<div class="login" role="dialog" aria-label="Entrar na demonstração">
+    <section class="login-art">
+      <div class="brand" style="padding:0"><div class="brand-mark" id="lg-mark">P</div><div><div class="brand-name" id="lg-name">Pátio</div><div class="brand-sub">CRM para revendas</div></div></div>
+      <div><h2>Cada lead da sua revenda, do primeiro contato ao contrato assinado.</h2><p class="lead">Funil, metas, consignados e um assistente de IA que avisa o que fazer antes de a venda esfriar.</p></div>
+      <div class="login-car" id="lg-car"></div>
+      <div class="feats"><span><i></i>Funciona no celular da equipe</span><span><i></i>Leads de WhatsApp, Instagram e portais</span><span><i></i>Comissões calculadas sozinhas</span></div>
+    </section>
+    <section class="login-form"><form id="lg-form" novalidate>
+      <div><div class="eyebrow">Demonstração</div><h1>Veja o sistema com a cara da sua loja</h1></div>
+      <div class="field"><label for="lg-loja">Nome da sua revenda</label><input id="lg-loja" maxlength="28" autocomplete="organization" placeholder="Ex.: Auto Center Sul" value="${brand.nome==="Pátio"?"":esc(brand.nome)}"></div>
+      <div class="field"><span class="lbl" id="lg-cor-l">Cor da marca</span><div class="swatches" role="group" aria-labelledby="lg-cor-l">${Object.entries(CORES).map(([k,c])=>`<button type="button" data-cor="${k}" aria-pressed="${k===tmp.cor}" aria-label="${c.nome}" title="${c.nome}"><span style="background:${c.a}"></span></button>`).join("")}</div></div>
+      <div class="divider"></div>
+      <div class="field"><label for="lg-mail">E-mail</label><input id="lg-mail" type="email" value="gerente@demo.com.br" autocomplete="off"></div>
+      <div class="field"><label for="lg-pass">Senha</label><input id="lg-pass" type="password" value="demonstracao" autocomplete="off"></div>
+      <button class="btn btn-primary" type="submit" style="padding:12px 14px;font-size:16px">Entrar na demonstração</button>
+      <p class="fine">Acesso de exemplo já preenchido. Todos os dados dentro do sistema são fictícios.</p>
+    </form></section>
+  </div>`;
+  const upd=()=>{const c=CORES[tmp.cor];const n=($("#lg-loja").value.trim()||"Pátio");
+    $("#lg-name").textContent=n;$("#lg-mark").textContent=initials(n).slice(0,1);
+    $("#lg-mark").style.background=c.a;$("#lg-mark").style.color=c.ink;
+    L.querySelector(".btn-primary").style.cssText+=`;background:${c.a};border-color:${c.a};color:${c.ink}`;
+    $("#lg-car").innerHTML=carSvg("suv",c.a);};
+  upd();
+  $("#lg-loja").oninput=upd;
+  L.querySelectorAll("[data-cor]").forEach(b=>b.onclick=()=>{tmp.cor=b.dataset.cor;L.querySelectorAll("[data-cor]").forEach(x=>x.setAttribute("aria-pressed",x===b));upd()});
+  $("#lg-form").onsubmit=e=>{e.preventDefault();brand={nome:$("#lg-loja").value.trim()||"Pátio",cor:tmp.cor};
+    try{localStorage.setItem("patio-brand",JSON.stringify(brand))}catch(_){}
+    applyBrand();L.innerHTML="";render();toast(`Bem-vindo ao CRM da ${brand.nome}`)};
+}
+
+// ================= Navegação =================
+function renderNav(){
+  $("#nav").innerHTML=VIEWS.map(v=>`<button data-v="${v.id}" ${v.id===view?'aria-current="page"':""}>${ICONS[v.id]}<span>${v.nome}</span></button>`).join("");
+  $("#nav").querySelectorAll("button").forEach(b=>b.onclick=()=>go(b.dataset.v));
+}
+function go(v){view=v;try{history.replaceState(null,"","#"+v)}catch(e){}render()}
+function header(eyebrow,title,extra=""){
+  return `<div class="top"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1></div><div class="top-actions">${extra}</div></div>`;
+}
+
+// ================= Cálculos (um único lugar, para tudo bater) =================
+function stats(){
+  const f=PERIODOS[periodo].f, sc=v=>Math.round(v*f);
+  const vendidosCard=LEADS.filter(l=>l.etapa==="vendido").length;
+  const rk=VEND.map(v=>{const atend=sc(BASE.atend[v.id])+LEADS.filter(l=>l.vend===v.id).length*(periodo==="mes"?1:0);const n=sc(BASE.vendas[v.id])+(periodo==="mes"?LEADS.filter(l=>l.vend===v.id&&l.etapa==="vendido").length:0);return{...v,atend:Math.max(atend,1),vend:n,conv:n/Math.max(atend,1)*100}}).sort((a,b)=>b.vend-a.vend||b.conv-a.conv);
+  const vendidos=rk.reduce((a,r)=>a+r.vend,0);
+  const leads=sc(BASE.leadsMes)+(periodo==="mes"?LEADS.length:0);
+  const cnt=id=>periodo==="mes"?LEADS.filter(l=>l.etapa===id).length:0;
+  const funil=[{n:"Leads recebidos",v:leads,c:"var(--info)"},{n:"Qualificados",v:sc(BASE.qualif)+cnt("qualificado"),c:"var(--violet)"},{n:"Visitaram a loja",v:sc(BASE.visita)+cnt("visita"),c:"var(--warn)"},{n:"Negociação",v:sc(BASE.negoc)+cnt("negociacao"),c:"var(--accent)"},{n:"Vendidos",v:vendidos,c:"var(--good)"}];
+  const orig=ORIGENS.map(o=>({...o,v:sc(o.base)+(periodo==="mes"?LEADS.filter(l=>l.origem===o.nome).length:0)}));
+  const vendMes=BASE.vendas.ana+BASE.vendas.bruno+BASE.vendas.diego+vendidosCard;
+  return{leads,vendidos,conv:vendidos/Math.max(leads,1)*100,fat:vendidos*TICKET,rk,funil,orig,vendMes,ritmo:vendMes/29*31};
+}
+
+// ================= Assistente IA =================
+function insights(){
+  const s=stats();
+  const parados=LEADS.filter(l=>ativo(l)&&l.dias>=3);
+  const maior=LEADS.filter(l=>l.etapa==="negociacao").sort((a,b)=>b.valor-a.valor)[0];
+  const novosSem=LEADS.filter(l=>l.etapa==="novo"&&!l.vend);
+  const consigVelho=CONSIG.slice().sort((a,b)=>b.dias-a.dias)[0];
+  const out=[];
+  if(parados.length)out.push({k:"Urgente",c:"var(--bad)",t:`<b>${parados.length} leads parados há 3 dias ou mais.</b> Quem não recebe retorno em 72h costuma comprar em outra loja.`,a:"Ver leads",fn:()=>{soParados=true;leadMode="lista";go("leads")}});
+  if(novosSem.length)out.push({k:"Atenção",c:"var(--warn)",t:`<b>${novosSem.length} leads novos sem vendedor.</b> ${novosSem.map(l=>l.nome.split(" ")[0]).join(", ")} chegaram e ainda não foram atendidos.`,a:"Distribuir",fn:()=>{novosSem.forEach((l,i)=>l.vend=VEND[i%VEND.length].id);toast(`${novosSem.length} leads distribuídos no rodízio`);render(false)}});
+  if(maior)out.push({k:"Oportunidade",c:"var(--accent)",t:`<b>${esc(maior.nome)}</b> negocia a ${esc(maior.carro.split(" ").slice(0,2).join(" "))} (${brl(maior.valor)}), o maior ticket do funil, há ${maior.dias} dias.`,a:"Abrir lead",fn:()=>openLead(maior.id)});
+  out.push({k:"Estoque",c:"var(--info)",t:`<b>${esc(consigVelho.modelo.split(" ").slice(0,2).join(" "))}</b> está há ${consigVelho.dias} dias no pátio. Baixar para ${brl(Math.round(consigVelho.fipe*.945/100)*100)} deixa o preço 5,5% abaixo da FIPE.`,a:"Ver carro",fn:()=>go("consig")});
+  out.push({k:"Meta",c:s.ritmo>=META?"var(--good)":"var(--warn)",t:`No ritmo atual, outubro fecha com <b>${Math.round(s.ritmo)} vendas</b> ${s.ritmo>=META?"e a meta de "+META+" é batida.":"e faltariam "+(META-Math.round(s.ritmo))+" para a meta."}`,a:"Ver metas",fn:()=>go("metas")});
+  return out.slice(0,4);
+}
+const PERGUNTAS=[
+  {q:"Quem é o melhor vendedor do mês?",a:()=>{const p=periodo;periodo="mes";const r=stats().rk;periodo=p;const best=r.slice().sort((a,b)=>b.conv-a.conv)[0];return `${r[0].nome} lidera em volume, com ${r[0].vend} vendas. Em conversão, quem se destaca é ${best.nome}: ${pct(best.conv)} dos atendimentos viram venda. Vale mandar para ${best.nome.split(" ")[0]} os leads mais quentes.`}},
+  {q:"Por que estamos perdendo vendas?",a:()=>"O principal motivo é preço: 31 clientes acharam mais barato em outro lugar. Em seguida vem crédito reprovado, com 22 casos. Fazer a simulação de financiamento em dois bancos antes da visita pode recuperar parte dessas vendas."},
+  {q:"Vamos bater a meta?",a:()=>{const s=stats();return `Até hoje são ${s.vendMes} vendas de ${META}. No ritmo atual, o mês fecha com cerca de ${Math.round(s.ritmo)}. ${s.ritmo>=META?"A meta deve ser batida, e os 2 leads em negociação podem garantir a margem.":"Para chegar lá, os leads em negociação precisam fechar esta semana."}`}},
+  {q:"Qual canal traz mais vendas?",a:()=>"O WhatsApp traz o maior volume, com 40% dos leads. Mas o Instagram converte melhor: 6,1% dos leads viram venda, contra 4,3% no WhatsApp. Investir em anúncio no Instagram tende a dar mais retorno por real gasto."}
+];
+function typeAnswer(text){
+  const el=$("#ai-ans");if(!el)return;
+  clearInterval(typer);
+  const head=`<div class="who">${ICONS.spark}Assistente</div>`;
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce){el.innerHTML=head+esc(text);return}
+  let i=0;el.innerHTML=head+'<span id="ai-t"></span><span class="caret"></span>';
+  typer=setInterval(()=>{i+=3;const t=$("#ai-t");if(!t){clearInterval(typer);return}t.textContent=text.slice(0,i);if(i>=text.length){clearInterval(typer);const c=el.querySelector(".caret");c&&c.remove()}},16);
+}
+
+// ================= Visão geral =================
+function viewGeral(){
+  const s=stats(), P=PERIODOS[periodo];
+  const maxF=Math.max(1,s.funil[0].v);
+  const totO=s.orig.reduce((a,o)=>a+o.v,0)||1;
+  let ang=0;const R=52,C=2*Math.PI*R;
+  const arcs=s.orig.map(o=>{const len=o.v/totO*C;const el=`<circle r="${R}" cx="70" cy="70" fill="none" stroke="${o.cor}" stroke-width="22" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-ang}" transform="rotate(-90 70 70)"/>`;ang+=len;return el}).join("");
+  const maxConv=Math.max(1,...s.rk.map(r=>r.conv));
+  const W=520,H=170,pl=30,pb=24,pt=16,max=30;
+  const tr=TREND.map(t=>t.v==null?{...t,v:s.vendMes}:t);
+  const x=i=>pl+i*(W-pl-16)/(tr.length-1), y=v=>pt+(H-pt-pb)*(1-v/max);
+  const path=tr.map((t,i)=>`${i?"L":"M"}${x(i)},${y(t.v)}`).join("");
+  const area=`${path}L${x(tr.length-1)},${y(0)}L${x(0)},${y(0)}Z`;
+  const grid=[0,10,20,30].map(g=>`<line x1="${pl}" x2="${W-6}" y1="${y(g)}" y2="${y(g)}" stroke="var(--line)"/><text x="${pl-8}" y="${y(g)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${g}</text>`).join("");
+  const metaY=y(META);
+  const parados=LEADS.filter(l=>l.dias>=3&&ativo(l));
+  const ins=insights();
+  const seg=`<div class="seg" role="group" aria-label="Período">${Object.entries(PERIODOS).map(([k,p])=>`<button data-per="${k}" aria-pressed="${k===periodo}">${p.nome}</button>`).join("")}</div>`;
+  return header(`${esc(brand.nome)} · ${periodo==="mes"?"Outubro 2026":periodo==="semana"?"26 a 29 de outubro":"Quinta, 29 de outubro"}`,"Visão geral",seg+`<button class="btn btn-primary" data-novo>+ Novo lead</button>`)+`
+  <div class="grid kpis">
+    <div class="panel kpi"><div class="label">Leads recebidos</div><div class="value num">${s.leads}</div><div class="delta"><span class="up">▲ 6%</span> vs período anterior</div></div>
+    <div class="panel kpi"><div class="label">Vendas</div><div class="value num">${s.vendidos}</div><div class="delta">${periodo==="mes"?`Meta ${META} · faltam ${Math.max(0,META-s.vendidos)}`:"contratos assinados "+P.ctx}</div></div>
+    <div class="panel kpi"><div class="label">Conversão</div><div class="value num">${pct(s.conv)}</div><div class="delta">lead → contrato assinado</div></div>
+    <div class="panel kpi"><div class="label">Faturamento est.</div><div class="value num">${s.fat>=1e6?(s.fat/1e6).toFixed(2).replace(".",",")+" mi":brl(s.fat)}</div><div class="delta">ticket médio ${brl(TICKET)}</div></div>
+  </div>
+  <section class="panel ai" aria-label="Assistente IA">
+    <div class="ai-head"><span class="ai-badge">${ICONS.spark}Assistente IA</span><span class="live" aria-hidden="true"></span><small>analisou ${s.leads} leads e ${s.vendidos} vendas ${P.ctx} · atualizado há 2 min</small></div>
+    <div class="ai-grid">
+      <div class="insights">${ins.map((it,i)=>`<div class="insight"><span class="stripe" style="background:${it.c}"></span><p><span class="kind" style="color:${it.c}">${it.k}</span>${it.t}</p><button class="btn btn-sm" data-ins="${i}">${it.a}</button></div>`).join("")}</div>
+      <div class="ask"><div class="eyebrow">Pergunte em português</div>
+        <div class="qchips">${PERGUNTAS.map((p,i)=>`<button data-q="${i}" aria-pressed="${aiQ===i}">${p.q}</button>`).join("")}</div>
+        <div class="answer" id="ai-ans" aria-live="polite">${aiQ===null?`<span style="color:var(--muted)">Toque numa pergunta. Na versão completa, a equipe pergunta o que quiser sobre os números da loja.</span>`:`<div class="who">${ICONS.spark}Assistente</div>${esc(PERGUNTAS[aiQ].a())}`}</div>
+      </div>
+    </div>
+  </section>
+  <div class="grid two" style="margin-top:16px">
+    <div class="panel"><div class="panel-head"><h2>Funil de vendas</h2><small>${P.ctx}</small></div>
+      <div class="funnel">${s.funil.map(f=>`<div class="frow"><span>${f.n}</span><div class="ftrack"><div class="fbar" style="width:${Math.max(3,f.v/maxF*100)}%;background:${f.c}"></div></div><b>${f.v}</b></div>`).join("")}</div>
+    </div>
+    <div class="panel"><div class="panel-head"><h2>Origem dos leads</h2><small>${totO} ${P.ctx}</small></div>
+      <div class="donut-wrap"><svg width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Origem dos leads">${arcs}<text x="70" y="69" text-anchor="middle" font-size="24" font-weight="700" fill="var(--fg)" font-family="Barlow Condensed, Arial Narrow, sans-serif">${Math.round(s.orig[0].v/totO*100)}%</text><text x="70" y="87" text-anchor="middle" font-size="11" fill="var(--muted)">WhatsApp</text></svg>
+      <div class="legend" style="flex:1;min-width:150px">${s.orig.map(o=>`<div><span class="sw" style="background:${o.cor}"></span>${o.nome}<span class="lv">${o.v}</span></div>`).join("")}</div></div>
+    </div>
+  </div>
+  <div class="grid two" style="margin-top:16px">
+    <div class="panel"><div class="panel-head"><h2>Ranking de vendedores</h2><small>conversão individual · ${P.ctx}</small></div>
+      <div class="tscroll"><table><thead><tr><th>#</th><th>Vendedor</th><th class="right">Atend.</th><th class="right">Vendas</th><th>Conversão</th></tr></thead><tbody>
+      ${s.rk.map((r,i)=>`<tr><td><span class="rank ${i===0?"r1":""}">${i+1}</span></td><td><div style="display:flex;align-items:center;gap:8px;white-space:nowrap">${av(r.id)}${r.nome}</div></td><td class="right num">${r.atend}</td><td class="right num"><b>${r.vend}</b></td><td><div style="display:flex;align-items:center;gap:8px"><div class="meter" style="flex:1"><i style="width:${r.conv/maxConv*100}%"></i></div><span class="num" style="font-size:13px">${pct(r.conv)}</span></div></td></tr>`).join("")}
+      </tbody></table></div>
+    </div>
+    <div class="panel"><div class="panel-head"><h2>Vendas por mês</h2><small>últimos 6 meses · linha = meta</small></div>
+      <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Vendas nos últimos 6 meses">${grid}
+        <line x1="${pl}" x2="${W-6}" y1="${metaY}" y2="${metaY}" stroke="var(--good)" stroke-dasharray="5 4" stroke-width="1.5"/><text x="${pl+4}" y="${metaY-5}" font-size="11" fill="var(--good)" font-weight="600">meta ${META}</text>
+        <path d="${area}" fill="var(--accent)" fill-opacity=".14"/><path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
+        ${tr.map((t,i)=>`<circle cx="${x(i)}" cy="${y(t.v)}" r="${i===tr.length-1?5:3}" fill="${i===tr.length-1?"var(--accent)":"var(--surface)"}" stroke="var(--accent)" stroke-width="2"/><text x="${x(i)}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--muted)">${t.m}</text>`).join("")}
+        <text x="${x(tr.length-1)}" y="${y(tr[tr.length-1].v)-10}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--fg)">${tr[tr.length-1].v}</text>
+      </svg>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:16px"><div class="panel-head"><h2>Precisam de atenção</h2><small>${parados.length} leads parados há 3 dias ou mais</small></div>
+    ${parados.length?`<div class="tscroll"><table><tbody>${parados.map(l=>`<tr data-lead="${l.id}" style="cursor:pointer"><td><b>${esc(l.nome)}</b><div style="font-size:13px;color:var(--muted)">${esc(l.carro)}</div></td><td>${chipEtapa(l.etapa)}</td><td>${av(l.vend)}</td><td class="right stale num">${l.dias} dias</td></tr>`).join("")}</tbody></table></div>`:`<p style="color:var(--muted);margin:0">Nenhum lead parado. Equipe em dia.</p>`}
+  </div>`;
+}
+function chipEtapa(id){const e=etapa(id);return `<span class="chip" style="background:color-mix(in srgb, ${e.cor} 16%, transparent);color:${e.cor}">${e.nome}</span>`}
+
+// ================= Leads =================
+function filtered(){const q=busca.trim().toLowerCase();return LEADS.filter(l=>(!q||(l.nome+" "+l.carro+" "+l.origem).toLowerCase().includes(q))&&(!soParados||(ativo(l)&&l.dias>=3)))}
+function tagsHtml(l){return l.tags.map(tag).filter(Boolean).map(t=>`<span class="tag" style="background:${t.cor}">${esc(t.nome)}</span>`).join("")}
+function leadCard(l){
+  return `<div class="card" data-lead="${l.id}" data-card tabindex="0" role="button" aria-label="${esc(l.nome)}, ${etapa(l.etapa).nome}">
+    <div class="name">${esc(l.nome)}</div><div class="car">${esc(l.carro)}</div>
+    ${l.tags.length?`<div class="tags">${tagsHtml(l)}</div>`:""}
+    <div class="meta"><span>${esc(l.origem)}</span><span style="display:flex;align-items:center;gap:6px">${l.dias>=3&&ativo(l)?`<span class="stale">${l.dias}d parado</span>`:`<span class="num">${brl(l.valor)}</span>`}${av(l.vend)}</span></div>
+  </div>`;
+}
+function viewLeads(){
+  const list=filtered(), ativos=LEADS.filter(ativo).length;
+  const body=leadMode==="kanban"
+    ?`<div class="kanban">${ETAPAS.map(e=>{const its=list.filter(l=>l.etapa===e.id);return `<div class="col" data-col="${e.id}"><div class="col-head"><span class="dot" style="background:${e.cor}"></span>${e.nome}<span class="count">${its.length}</span></div>${its.map(leadCard).join("")||`<div style="font-size:13px;color:var(--muted);padding:8px 4px">Arraste um lead para cá</div>`}</div>`}).join("")}</div>`
+    :`<div class="panel" style="padding:6px 8px"><div class="tscroll"><table><thead><tr><th>Cliente</th><th class="hide-sm">Veículo de interesse</th><th>Etapa</th><th class="hide-sm">Origem</th><th class="hide-sm">Etiquetas</th><th>Vend.</th><th class="right hide-sm">Valor</th></tr></thead><tbody>
+      ${list.map(l=>`<tr data-lead="${l.id}" style="cursor:pointer"><td><b>${esc(l.nome)}</b>${l.dias>=3&&ativo(l)?`<div class="stale" style="font-size:12px">${l.dias} dias parado</div>`:""}</td><td class="hide-sm">${esc(l.carro)}</td><td>${chipEtapa(l.etapa)}</td><td class="hide-sm">${esc(l.origem)}</td><td class="hide-sm"><div class="tags">${tagsHtml(l)}</div></td><td>${av(l.vend)}</td><td class="right num hide-sm">${brl(l.valor)}</td></tr>`).join("")||`<tr><td colspan="7" style="color:var(--muted)">Nenhum lead encontrado.</td></tr>`}
+    </tbody></table></div></div>`;
+  return header(`${ativos} em atendimento agora · ${BASE.leadsMes+LEADS.length} recebidos em outubro`,"Leads",`<button class="btn btn-primary" data-novo>+ Novo lead</button>`)+`
+  <div class="toolbar"><div class="seg" role="group" aria-label="Modo de visualização"><button data-mode="kanban" aria-pressed="${leadMode==="kanban"}">Kanban</button><button data-mode="lista" aria-pressed="${leadMode==="lista"}">Lista</button></div>
+  <input class="search" id="busca" type="search" placeholder="Buscar cliente, carro ou origem" value="${esc(busca)}">
+  ${soParados?`<span class="filterchip">Parados há 3+ dias<button id="limpa" aria-label="Remover filtro">×</button></span>`:""}
+  ${leadMode==="kanban"?`<span class="hint">Segure e arraste o cartão para mudar a etapa. Toque para abrir.</span>`:""}</div>${body}`;
+}
+
+// ================= Agenda =================
+function viewAgenda(){
+  const tipoCor={"Visita":"var(--info)","Avaliação":"var(--violet)","Consignação":"var(--warn)","Fechamento":"var(--good)","Follow-up":"var(--accent)"};
+  return header("Próximos 3 dias","Agenda de visitas")+`<div class="agenda">${AGENDA.map(d=>`<div class="day"><h3>${d.dia}</h3>${d.itens.map(i=>`<div class="slot"><time class="num">${i.h}</time><div style="min-width:0"><div class="who">${esc(i.who)}</div><div class="what">${esc(i.what)} · ${esc(i.resp)}</div></div><span class="chip" style="background:color-mix(in srgb, ${tipoCor[i.tipo]} 16%, transparent);color:${tipoCor[i.tipo]}">${i.tipo}</span></div>`).join("")}</div>`).join("")}</div>`;
+}
+
+// ================= Consignados =================
+function viewConsig(){
+  const total=CONSIG.reduce((a,c)=>a+c.preco,0);
+  return header(`${CONSIG.length} veículos de terceiros · ${brl(total)} em consignação`,"Consignados")+`<div class="grid cars">${CONSIG.map(c=>`<div class="panel carcard">
+    <div class="carimg">${carSvg(c.tipo,c.cor)}</div>
+    <div class="row"><span class="plate"><i></i><span>${c.placa}</span></span><span style="font-size:13px;color:${c.dias>20?"var(--bad)":"var(--muted)"};font-weight:${c.dias>20?600:400}">${c.dias} dias no pátio</span></div>
+    <h3>${esc(c.modelo)}</h3>
+    <div class="specs"><span>${c.km}</span><span>${c.corNome}</span><span>Dono: ${esc(c.dono)}</span></div>
+    <div class="row"><span class="price num">${brl(c.preco)}</span><span style="font-size:13px;color:var(--good)">${pct(Math.abs(c.preco/c.fipe-1)*100)} abaixo da FIPE</span></div>
+    <div><div class="steps">${CONSIG_ETAPAS.map((_,i)=>`<i class="${i<=c.etapa?"on":""}"></i>`).join("")}</div><div style="font-size:12px;color:var(--muted);margin-top:5px">${CONSIG_ETAPAS[c.etapa]}</div></div>
+  </div>`).join("")}</div>`;
+}
+
+// ================= Metas e comissões =================
+function viewMetas(){
+  const p0=periodo;periodo="mes";const s=stats();periodo=p0;
+  const pc=Math.min(100,s.vendMes/META*100);
+  const sdr=Math.round(s.vendMes*.78);
+  const perdas=[{m:"Preço / achou mais barato",v:31},{m:"Crédito reprovado",v:22},{m:"Desistiu da compra",v:17},{m:"Comprou em outra loja",v:12},{m:"Sem retorno",v:9}];
+  const mp=perdas[0].v;
+  const totCom=s.rk.reduce((a,r)=>a+r.vend*COMISSAO_VEND,0)+sdr*COMISSAO_SDR;
+  return header("Outubro 2026","Metas e comissões")+`
+  <div class="grid two">
+    <div class="panel"><div class="eyebrow">Meta de vendas do mês</div>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px"><span class="goal-big num">${s.vendMes}</span><span style="font-size:18px;color:var(--muted)">de ${META} carros</span></div>
+      <div class="bar-goal"><i style="width:${pc}%"></i></div>
+      <div class="row" style="font-size:14px;color:var(--muted)"><span>${pc.toFixed(0)}% atingido · faltam 2 dias</span><span>Previsão: <b style="color:var(--fg)">${Math.round(s.ritmo)} vendas</b></span></div>
+    </div>
+    <div class="panel"><div class="panel-head"><h2>Motivos de perda</h2><small>últimos 30 dias</small></div>
+      <div class="funnel">${perdas.map(p=>`<div class="frow" style="grid-template-columns:minmax(0,1fr) 90px 30px"><span>${p.m}</span><div class="ftrack" style="height:10px"><div class="fbar" style="width:${p.v/mp*100}%;background:var(--bad)"></div></div><b>${p.v}</b></div>`).join("")}</div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:16px"><div class="panel-head"><h2>Comissões estimadas</h2><small>total ${brl(totCom)} · editável por cargo</small></div>
+    <div class="tscroll"><table><thead><tr><th>Pessoa</th><th>Cargo</th><th class="right">Vendas</th><th class="right hide-sm">Por venda</th><th class="right">Comissão</th></tr></thead><tbody>
+    ${s.rk.map(r=>`<tr><td><div style="display:flex;align-items:center;gap:8px;white-space:nowrap">${av(r.id)}${r.nome}</div></td><td>Vendedor</td><td class="right num">${r.vend}</td><td class="right num hide-sm">${brl(COMISSAO_VEND)}</td><td class="right num"><b>${brl(r.vend*COMISSAO_VEND)}</b></td></tr>`).join("")}
+    <tr><td><div style="display:flex;align-items:center;gap:8px;white-space:nowrap"><span class="avatar" style="background:var(--accent);color:var(--accent-ink)">PV</span>Pré-vendas</div></td><td>SDR</td><td class="right num">${sdr}</td><td class="right num hide-sm">${brl(COMISSAO_SDR)}</td><td class="right num"><b>${brl(sdr*COMISSAO_SDR)}</b></td></tr>
+    </tbody></table></div>
+  </div>`;
+}
+
+// ================= Ficha do lead =================
+const MODELOS_WA=[
+  {n:"Primeiro contato",t:l=>`Olá, ${l.nome.split(" ")[0]}! Aqui é da ${brand.nome}. Vi seu interesse no ${l.carro.split(" ").slice(0,3).join(" ")}. Ele ainda está disponível. Quer agendar uma visita ou um test-drive?`},
+  {n:"Follow-up",t:l=>`Oi, ${l.nome.split(" ")[0]}, tudo bem? Passando para saber se ficou alguma dúvida sobre o ${l.carro.split(" ").slice(0,2).join(" ")}. Consigo segurar a condição que conversamos até sábado.`},
+  {n:"Simulação",t:l=>`${l.nome.split(" ")[0]}, fiz a simulação do ${l.carro.split(" ").slice(0,2).join(" ")} com entrada de 30%: parcelas a partir de ${brl(Math.round(l.valor*.7/48*1.35/10)*10)} em 48x. Posso te mandar os detalhes?`}
+];
+function openLead(id){
+  const l=LEADS.find(x=>x.id===id);if(!l)return;
+  let tpl=0;
+  const draw=()=>{
+    $("#layer").innerHTML=`<div class="scrim" id="scrim"></div><aside class="drawer" role="dialog" aria-modal="true" aria-label="Ficha de ${esc(l.nome)}">
+      <div class="row" style="align-items:flex-start;flex-wrap:nowrap"><div style="min-width:0"><div class="eyebrow">${esc(l.origem)} · ${etapa(l.etapa).nome}</div><h1 style="font-size:28px">${esc(l.nome)}</h1><div style="color:var(--muted)" class="num">${esc(l.tel)}</div></div><button class="close" id="x" aria-label="Fechar">×</button></div>
+      <div class="interest"><div style="min-width:0"><div class="eyebrow">Interesse</div><div style="font-weight:600;margin-top:2px">${esc(l.carro)}</div><div class="num" style="font-family:var(--f-display);font-size:24px;font-weight:700">${brl(l.valor)}</div></div>${carSvg(tipoCarro(l.carro),l.cor||"#9aa0a6")}</div>
+      <div class="wa-box">
+        <div class="row"><span class="eyebrow">Mensagem rápida</span><div class="tpl">${MODELOS_WA.map((m,i)=>`<button data-tpl="${i}" aria-pressed="${i===tpl}">${m.n}</button>`).join("")}</div></div>
+        <div class="bubble">${esc(MODELOS_WA[tpl].t(l))}</div>
+        <div class="row"><button class="btn btn-wa" id="wa">${ICONS.wa}Enviar no WhatsApp</button><button class="btn btn-sm" id="copy">Copiar texto</button></div>
+      </div>
+      <div class="fields2">
+        <div class="field"><label for="d-etapa">Etapa</label><select id="d-etapa">${ETAPAS.map(e=>`<option value="${e.id}" ${e.id===l.etapa?"selected":""}>${e.nome}</option>`).join("")}</select></div>
+        <div class="field"><label for="d-vend">Vendedor</label><select id="d-vend"><option value="">Sem vendedor</option>${VEND.map(v=>`<option value="${v.id}" ${v.id===l.vend?"selected":""}>${v.nome}</option>`).join("")}</select></div>
+      </div>
+      <div class="field"><span class="lbl">Etiquetas</span><div class="tagpick">${TAGS.map(t=>{const on=l.tags.includes(t.id);return `<button data-tag="${t.id}" aria-pressed="${on}" style="${on?`background:${t.cor}`:""}">${esc(t.nome)}</button>`}).join("")}</div></div>
+      <div class="field"><span class="lbl">Histórico</span><div class="timeline">
+        <div>Lead entrou pelo ${esc(l.origem)}<small>há ${l.dias+2} dias · automático</small></div>
+        <div>Pré-vendas qualificou: busca ${esc(l.carro.split(" ").slice(0,2).join(" "))}, ${l.tags.includes("t2")?"quer financiar":"pagamento a definir"}${l.tags.includes("t1")?", tem carro na troca":""}<small>há ${l.dias+1} dias · Pré-vendas</small></div>
+        ${l.vend?`<div>Encaminhado para ${esc(vend(l.vend).nome)}<small>há ${l.dias} dias · rodízio automático</small></div>`:""}
+        ${l.motivo?`<div style="color:var(--bad)">Perdido: ${esc(l.motivo)}</div>`:""}
+      </div></div>
+    </aside>`;
+    $("#x").onclick=$("#scrim").onclick=closeLayer;
+    $("#x").focus();
+    $("#d-etapa").onchange=e=>{l.etapa=e.target.value;l.dias=0;toast(`Movido para ${etapa(l.etapa).nome}`);render(false);draw()};
+    $("#d-vend").onchange=e=>{l.vend=e.target.value||null;toast(l.vend?`Atribuído a ${vend(l.vend).nome}`:"Vendedor removido");render(false)};
+    document.querySelectorAll("[data-tag]").forEach(b=>b.onclick=()=>{const t=b.dataset.tag;l.tags=l.tags.includes(t)?l.tags.filter(x=>x!==t):[...l.tags,t];draw();render(false)});
+    document.querySelectorAll("[data-tpl]").forEach(b=>b.onclick=()=>{tpl=+b.dataset.tpl;draw()});
+    $("#wa").onclick=()=>toast("Na versão completa, a mensagem vai direto para o WhatsApp do cliente e fica salva no histórico.");
+    $("#copy").onclick=()=>{const txt=MODELOS_WA[tpl].t(l);try{navigator.clipboard.writeText(txt).then(()=>toast("Texto copiado"),()=>selectBubble())}catch(e){selectBubble()}};
+  };
+  draw();
+}
+function selectBubble(){const b=document.querySelector(".bubble");if(!b)return;const r=document.createRange();r.selectNodeContents(b);const s=getSelection();s.removeAllRanges();s.addRange(r);toast("Texto selecionado. Copie com o atalho do seu aparelho.")}
+function closeLayer(){$("#layer").innerHTML=""}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeLayer()});
+
+// ================= Novo lead =================
+function openNovo(){
+  $("#layer").innerHTML=`<div class="scrim" id="scrim"></div><form class="modal" id="f" role="dialog" aria-modal="true" aria-label="Novo lead" novalidate>
+    <div class="row"><h2 style="font-size:24px">Novo lead</h2><button type="button" class="close" id="x" aria-label="Fechar">×</button></div>
+    <div class="field"><label for="n-nome">Nome do cliente</label><input id="n-nome" autocomplete="off" placeholder="Ex.: João da Silva"></div>
+    <div class="fields2">
+      <div class="field"><label for="n-tel">WhatsApp</label><input id="n-tel" inputmode="tel" placeholder="(51) 9 0000-0000"></div>
+      <div class="field"><label for="n-origem">Origem</label><select id="n-origem">${ORIGENS.map(o=>`<option>${o.nome}</option>`).join("")}</select></div>
+    </div>
+    <div class="field"><label for="n-carro">Veículo de interesse</label><input id="n-carro" placeholder="Ex.: Onix LT 2022"></div>
+    <div class="fields2">
+      <div class="field"><label for="n-valor">Valor (R$)</label><input id="n-valor" inputmode="numeric" placeholder="85000"></div>
+      <div class="field"><label for="n-vend">Vendedor</label><select id="n-vend"><option value="">Rodízio automático</option>${VEND.map(v=>`<option value="${v.id}">${v.nome}</option>`).join("")}</select></div>
+    </div>
+    <div class="err" id="n-err" hidden>Preencha o nome do cliente e o veículo de interesse.</div>
+    <button class="btn btn-primary" type="submit" style="padding:11px 14px">Cadastrar lead</button>
+  </form>`;
+  $("#x").onclick=$("#scrim").onclick=closeLayer;
+  $("#n-nome").focus();
+  $("#f").onsubmit=e=>{
+    e.preventDefault();
+    const nome=$("#n-nome").value.trim(),carro=$("#n-carro").value.trim();
+    if(!nome||!carro){$("#n-err").hidden=false;return}
+    let v=$("#n-vend").value;
+    if(!v){v=VEND.map(x=>({id:x.id,n:LEADS.filter(l=>l.vend===x.id&&ativo(l)).length})).sort((a,b)=>a.n-b.n)[0].id}
+    LEADS.unshift({id:Date.now(),nome,tel:$("#n-tel").value.trim()||"(51) 9 0000-0000",carro,cor:"#9aa0a6",valor:parseInt($("#n-valor").value.replace(/\D/g,""))||0,origem:$("#n-origem").value,etapa:"novo",vend:v,dias:0,tags:[]});
+    closeLayer();toast(`Lead cadastrado e enviado para ${vend(v).nome}`);
+    if(view!=="geral")view="leads";render();
+  };
+}
+
+// ================= Arrastar (mouse e toque) =================
+function colAt(x,y){const el=document.elementFromPoint(x,y);return el&&el.closest("[data-col]")}
+function startDrag(card,x,y){
+  const r=card.getBoundingClientRect();const g=card.cloneNode(true);
+  g.classList.add("ghost");g.removeAttribute("data-lead");g.style.width=r.width+"px";g.style.left=r.left+"px";g.style.top=r.top+"px";
+  document.body.appendChild(g);card.classList.add("dragging");
+  dragState={id:+card.dataset.lead,card,g,dx:x-r.left,dy:y-r.top,over:null};
+  try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
+}
+function moveDrag(x,y){
+  const d=dragState;if(!d)return;d.g.style.left=(x-d.dx)+"px";d.g.style.top=(y-d.dy)+"px";
+  const c=colAt(x,y);if(c!==d.over){d.over&&d.over.classList.remove("drop");c&&c.classList.add("drop");d.over=c}
+  const k=document.querySelector(".kanban");if(k){const kr=k.getBoundingClientRect();if(x<kr.left+44)k.scrollLeft-=14;else if(x>kr.right-44)k.scrollLeft+=14}
+}
+function endDrag(x,y){
+  const d=dragState;if(!d)return;dragState=null;d.g.remove();d.card.classList.remove("dragging");d.over&&d.over.classList.remove("drop");
+  suppressClick=true;setTimeout(()=>suppressClick=false,80);
+  const c=colAt(x,y);const l=LEADS.find(v=>v.id===d.id);
+  if(c&&l&&l.etapa!==c.dataset.col){l.etapa=c.dataset.col;l.dias=0;toast(`${l.nome.split(" ")[0]} → ${etapa(l.etapa).nome}`)}
+  render(false);
+}
+function bindDrag(card){
+  card.addEventListener("mousedown",e=>{
+    if(e.button!==0)return;const sx=e.clientX,sy=e.clientY;let started=false;
+    const mm=ev=>{if(!started){if(Math.hypot(ev.clientX-sx,ev.clientY-sy)<6)return;started=true;startDrag(card,sx,sy)}ev.preventDefault();moveDrag(ev.clientX,ev.clientY)};
+    const mu=ev=>{document.removeEventListener("mousemove",mm);document.removeEventListener("mouseup",mu);if(started)endDrag(ev.clientX,ev.clientY)};
+    document.addEventListener("mousemove",mm);document.addEventListener("mouseup",mu);
+  });
+  card.addEventListener("touchstart",e=>{
+    if(e.touches.length>1)return;const t=e.touches[0];const sx=t.clientX,sy=t.clientY;let lx=sx,ly=sy,started=false;
+    const timer=setTimeout(()=>{started=true;startDrag(card,lx,ly)},280);
+    const off=()=>{card.removeEventListener("touchmove",tm);card.removeEventListener("touchend",te);card.removeEventListener("touchcancel",te)};
+    const tm=ev=>{const p=ev.touches[0];lx=p.clientX;ly=p.clientY;if(!started){if(Math.hypot(lx-sx,ly-sy)>8){clearTimeout(timer);off()}return}ev.preventDefault();moveDrag(lx,ly)};
+    const te=ev=>{clearTimeout(timer);off();if(started){ev.preventDefault();endDrag(lx,ly)}};
+    card.addEventListener("touchmove",tm,{passive:false});card.addEventListener("touchend",te);card.addEventListener("touchcancel",te);
+  },{passive:true});
+  card.addEventListener("contextmenu",e=>e.preventDefault());
+}
+
+// ================= Render =================
+function render(full=true){
+  renderNav();
+  const k=document.querySelector(".kanban"),sl=k?k.scrollLeft:0;
+  const m=$("#main");
+  m.innerHTML={geral:viewGeral,leads:viewLeads,agenda:viewAgenda,consig:viewConsig,metas:viewMetas}[view]();
+  m.querySelectorAll("[data-novo]").forEach(b=>b.onclick=openNovo);
+  m.querySelectorAll("[data-lead]").forEach(el=>{
+    el.addEventListener("click",()=>{if(!suppressClick)openLead(+el.dataset.lead)});
+    el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openLead(+el.dataset.lead)}});
+  });
+  m.querySelectorAll("[data-card]").forEach(bindDrag);
+  m.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{leadMode=b.dataset.mode;render(false)});
+  m.querySelectorAll("[data-per]").forEach(b=>b.onclick=()=>{periodo=b.dataset.per;render(false)});
+  const ins=insights();m.querySelectorAll("[data-ins]").forEach(b=>b.onclick=()=>ins[+b.dataset.ins].fn());
+  m.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{aiQ=+b.dataset.q;m.querySelectorAll("[data-q]").forEach(x=>x.setAttribute("aria-pressed",x===b));typeAnswer(PERGUNTAS[aiQ].a())});
+  const lp=$("#limpa");if(lp)lp.onclick=()=>{soParados=false;render(false)};
+  const bi=$("#busca");if(bi)bi.oninput=e=>{busca=e.target.value;const pos=e.target.selectionStart;render(false);const n=$("#busca");n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}};
+  const k2=document.querySelector(".kanban");if(k2)k2.scrollLeft=sl;
+  if(full)window.scrollTo(0,0);
+}
+$("#sair").onclick=$("#sair-m").onclick=showLogin;
+window.addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(VIEWS.some(v=>v.id===h)&&h!==view){view=h;render()}});
+applyBrand();render();
+if(!VIEWS.some(v=>v.id===startHash))showLogin();
+</script>
+
+<style>.ps-back{position:fixed;right:16px;bottom:16px;z-index:9999;display:flex;gap:6px;font:600 13px/1 Inter,system-ui,sans-serif}
+.ps-back a{display:inline-flex;align-items:center;gap:6px;padding:11px 15px;border-radius:999px;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.ps-back .b1{background:#021442;color:#fff}.ps-back .b2{background:#1f9d55;color:#fff}
+@media (max-width:820px){.ps-back{bottom:calc(78px + env(safe-area-inset-bottom,0px));right:10px}.ps-back a{padding:9px 12px;font-size:12px}}</style>
+<div class="ps-back"><a class="b1" href="../index.html">&larr; Voltar ao site</a><a class="b2" href="../index.html#contato">Quero um assim</a></div>
+</body></html>
