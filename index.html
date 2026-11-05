@@ -7,7 +7,7 @@
 <meta name="description" content="Sistemas de gestão sob medida para clínicas e empresas: pacientes, agenda, orçamentos e retornos em uma tela só. Veja as demonstrações.">
 <meta property="og:title" content="Pedro Schütz · Sistemas de gestão sob medida">
 <meta property="og:description" content="Pacientes, agenda, orçamentos e retornos em uma tela só. Veja as demonstrações.">
-<meta property="og:image" content="assets/demo-clinica.jpg">
+<meta property="og:image" content="assets/demo-estetica-odonto.jpg">
 <link rel="icon" href="assets/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -75,7 +75,7 @@ h2{font-size:clamp(32px,4.2vw,52px);line-height:1.02;font-weight:800;letter-spac
 .ice{background:var(--ice)}
 
 /* demos */
-.demos{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.demos{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .demo{background:#fff;border:1px solid var(--line);border-radius:28px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
 .demo:hover{transform:translateY(-4px);box-shadow:0 30px 60px rgba(2,20,66,.12)}
 .shot{aspect-ratio:16/10;overflow:hidden;background:var(--sky);border-bottom:1px solid var(--line);position:relative}
@@ -140,6 +140,7 @@ footer .brand{color:var(--ink);font-size:16px}
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
 
 @media (max-width:980px){
+  .demos{grid-template-columns:1fr 1fr}
   .hero .wrap{grid-template-columns:1fr;min-height:0;padding-top:56px;gap:0}
   .hero-txt{padding-bottom:20px}
   .hero-img img{max-width:340px;margin:0 auto}
@@ -205,24 +206,18 @@ footer .brand{color:var(--ink);font-size:16px}
       <div class="sec-head rv">
         <div class="tag dark">Demonstrações</div>
         <h2>Abra, clique e veja funcionando.</h2>
-        <p>Cada demonstração é um sistema de verdade, com dados de exemplo. Na sua empresa, ele é montado com as etapas, os serviços e as pessoas de vocês.</p>
+        <p>Escolha a área mais parecida com a sua. Cada demonstração é um sistema de verdade, com dados de exemplo. Na sua empresa, ele é montado com as etapas, os serviços e as pessoas de vocês.</p>
       </div>
       <div class="demos">
-        <a class="demo rv" href="demos/clinica.html" target="_blank" rel="noopener">
-          <div class="shot"><img src="assets/demo-clinica.jpg" alt="Tela da demonstração para clínicas" loading="lazy"><span class="chip">Clínicas em geral</span></div>
-          <div class="demo-body"><h3>Clínica Exemplo</h3><p>Odonto, fisio, ortopedia e estética no mesmo painel, com o dia inteiro em uma tela.</p>
-            <div class="feats"><span>Visão geral</span><span>Agenda</span><span>Funil</span><span>Acompanhamento</span></div>
-            <span class="open">Abrir demonstração</span></div>
-        </a>
         <a class="demo rv" href="demos/estetica-odonto.html" target="_blank" rel="noopener">
           <div class="shot"><img src="assets/demo-estetica-odonto.jpg" alt="Tela da demonstração para estética e odontologia" loading="lazy"><span class="chip">Estética e odontologia</span></div>
-          <div class="demo-body"><h3>Clínica Lumen</h3><p>Orçamentos acompanhados de perto e retornos de cada procedimento na hora certa.</p>
-            <div class="feats"><span>Pacientes</span><span>Funil</span><span>Retornos</span><span>Orçamentos</span></div>
+          <div class="demo-body"><h3>Clínica Lumen</h3><p>Do primeiro contato ao tratamento fechado: arraste cada paciente pelas etapas e veja os retornos de cada procedimento.</p>
+            <div class="feats"><span>Funil</span><span>Orçamentos</span><span>Retornos</span><span>Agenda</span></div>
             <span class="open">Abrir demonstração</span></div>
         </a>
         <a class="demo rv" href="demos/fisioterapia.html" target="_blank" rel="noopener">
           <div class="shot"><img src="assets/demo-fisioterapia.jpg" alt="Tela da demonstração para fisioterapia" loading="lazy"><span class="chip">Fisioterapia</span></div>
-          <div class="demo-body"><h3>Kinesis Fisioterapia</h3><p>Sessões, pacotes e quem parou de vir, para nenhum tratamento ficar pela metade.</p>
+          <div class="demo-body"><h3>Kinesis Fisioterapia</h3><p>Quem parou de vir, pacotes acabando e reavaliações, para nenhum tratamento ficar pela metade.</p>
             <div class="feats"><span>Acompanhamento</span><span>Pacientes</span><span>Agenda</span><span>Funil</span></div>
             <span class="open">Abrir demonstração</span></div>
         </a>
@@ -233,7 +228,7 @@ footer .brand{color:var(--ink);font-size:16px}
             <span class="open">Abrir demonstração</span></div>
         </a>
       </div>
-      <div class="note rv">Todos os dados são fictícios. Pode clicar à vontade: nada é salvo.</div>
+      <div class="note rv">Todos os dados são fictícios. Pode clicar à vontade: nada é salvo. Sua área não está aqui? O sistema é montado para ela também.</div>
     </div>
   </section>
 
