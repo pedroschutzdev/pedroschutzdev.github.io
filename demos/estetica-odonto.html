@@ -226,7 +226,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
   .pac-row{grid-template-columns:1fr auto}
   .pac-row .hide-m{display:none}
   .pac-head{display:none}
-  .ret-row,.orc-row{grid-template-columns:1fr auto}
+  .ret-row,.orc-row{grid-template-columns:minmax(0,1fr);gap:6px}
   .ret-row .acts,.orc-row .acts{grid-column:1/-1;justify-content:flex-start}
   .orc-row .hide-m,.ret-row .hide-m{display:none}
   .form{grid-template-columns:1fr}
@@ -263,7 +263,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;ba
 const CONFIG = {
   nome: "Clínica Lumen",
   subtitulo: "Estética & Odontologia",
-  cor: "#1f6b75",
+  cor: "#9b4d6e",
   segmento: "ambos",            // "estetica", "odonto" ou "ambos"
   equipe: [
     { nome: "Dra. Carolina Mendes", area: "Harmonização facial", seg: "estetica" },
@@ -337,7 +337,7 @@ const telFake = () => `(51) 9 ••••-${String(entre(1000, 9999))}`;
 /* ---------- dados de exemplo ---------- */
 const PRIMEIROS = ["Ana Paula","Bruna","Camila","Daniela","Eduarda","Fernanda","Gabriela","Helena","Isabela","Juliana","Larissa","Mariana","Natália","Patrícia","Rafaela","Sabrina","Tatiane","Vanessa","Luana","Carolina","Carlos","Diego","Felipe","Ricardo","André","Rodrigo","Thiago","Bruno","Lucas","Marcos"];
 const SOBRENOMES = ["Ribeiro","Kessler","Fontoura","Machado","Pires","Bittencourt","Schmitt","Dornelles","Vargas","Moraes","Becker","Lopes","Weber","Antunes","Martins","Castro","Rocha","Klein","Prates","Lemos","Coelho","Saraiva","Fagundes","Teixeira"];
-let S = {};
+let S = {tela: "funil"};
 
 function gerarDados() {
   seed = 7;
@@ -858,7 +858,8 @@ render();
 
 <style>.ps-back{position:fixed;right:16px;bottom:16px;z-index:9999;display:flex;gap:6px;font:600 13px/1 Inter,system-ui,sans-serif}
 .ps-back a{display:inline-flex;align-items:center;gap:6px;padding:11px 15px;border-radius:999px;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.25)}
-.ps-back .b1{background:#021442;color:#fff}.ps-back .b2{background:#1f9d55;color:#fff}
-@media (max-width:820px){.ps-back{bottom:calc(78px + env(safe-area-inset-bottom,0px));right:10px}.ps-back a{padding:9px 12px;font-size:12px}}</style>
+.ps-back .b1{background:#021442;color:#fff}.ps-back .b3{background:#fff;color:#021442}.ps-back .b2{background:#1f9d55;color:#fff}
+@media (max-width:820px){.ps-back{position:static;justify-content:center;flex-wrap:wrap;background:#021442;padding:8px 10px;gap:6px}.ps-back a{box-shadow:none;padding:8px 12px;font-size:12px}.ps-back .b1{padding-left:4px;padding-right:4px}}</style>
 <div class="ps-back"><a class="b1" href="../index.html">&larr; Voltar ao site</a><a class="b2" href="../index.html#contato">Quero um assim</a></div>
+<script id="ps-prepend">(function(){var b=document.querySelector(".ps-back");if(window.top!==window){b.remove();return}document.body.prepend(b);var m=matchMedia("(max-width:820px)").matches;var a=document.createElement("a");a.className="b3";a.href="../ver.html?demo=estetica-odonto&modo="+(m?"computador":"celular");a.textContent=m?"Ver no computador":"Ver no celular";b.insertBefore(a,b.children[1]);})()</script>
 </body></html>
